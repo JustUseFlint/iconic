@@ -1,0 +1,13 @@
+import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath } from 'node:url';
+import { cases, services, news } from './data.mjs';
+import { home, workIndex, caseStudy } from './pages-a.mjs';
+import { servicesIndex, servicePage, about, clientsPage, newsIndex, article, careers, contact, notFound } from './pages-b.mjs';
+const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const w = (p, html) => { const f = path.join(OUT, p); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, html); };
+w('index.html', home()); w('work/index.html', workIndex());
+cases.forEach((c, i) => w(`work/${c.slug}/index.html`, caseStudy(c, i)));
+w('services/index.html', servicesIndex()); services.forEach((s, i) => w(`services/${s.slug}/index.html`, servicePage(s, i)));
+w('about/index.html', about()); w('clients/index.html', clientsPage()); w('news/index.html', newsIndex());
+news.forEach(n => w(`news/${n.slug}/index.html`, article(n)));
+w('careers/index.html', careers()); w('contact/index.html', contact()); w('404.html', notFound());
+console.log('built', 9 + cases.length + services.length + news.length, 'pages');
