@@ -26,15 +26,15 @@ function accMenu(root, path) {
   const L = (t, h, ext) => `<a href="${ext ? h : root + h}"${ext ? '' : cur(h)}>${t}</a>`;
   const rows = [
     ['Work', 'aerial-hunter-hero', [['Case studies', cases.map(c => L(c.short || c.client, `work/${c.slug}/`))], ['Browse', [L('All work', 'work/'), L('Clients', 'clients/')]]]],
-    ['Services', 'casa-fresca-how', [['Practices', services.slice(0, 3).map(x => L(x.name, `services/${x.slug}/`))], ['', services.slice(3).map(x => L(x.name, `services/${x.slug}/`))], ['Overview', [L('All services', 'services/')]]]],
+    ['Services', 'studio-2', [['Practices', services.slice(0, 3).map(x => L(x.name, `services/${x.slug}/`))], ['', services.slice(3).map(x => L(x.name, `services/${x.slug}/`))], ['Overview', [L('All services', 'services/')]]]],
     ['Studio', 'studio', [['Flint', [L('About', 'about/'), L('Clients', 'clients/'), L('News', 'news/')]], ['Latest', news.slice(0, 2).map(n => L(n.title, `news/${n.slug}/`))]]],
-    ['Contact', 'studio-2', [['New project', [L('Start a project', 'contact/'), L('support@justuseflint.com', 'mailto:support@justuseflint.com', true)]], ['Service area', [`<span>Seven counties in west-central Indiana</span>`]]]],
+    ['Contact', '', [['New project', [L('Start a project', 'contact/'), L('support@justuseflint.com', 'mailto:support@justuseflint.com', true)]], ['Service area', [`<span>Seven counties in west-central Indiana</span>`]]]],
   ];
   return `<div class="acm" id="acm" data-acm role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true" inert>
   <div class="acm-top"><a class="acm-logo" href="${root}" aria-label="Flint home">${logo()}</a><div class="acm-tr"><a class="btn btn-sm acm-cta" href="${root}contact/"><span>Start a project</span></a><button class="acm-x" type="button" aria-label="Close menu" data-acm-close>${dots}</button></div></div>
   <ul class="acm-list">${rows.map(([t, im, cols], k) => `<li class="acm-row" data-acm-row>
     <button class="acm-h" type="button" aria-expanded="false" aria-controls="acm-p${k}" id="acm-h${k}"><span class="mono acm-n">0${k + 1}</span><span class="acm-t"><span>${t}</span></span><span class="acm-pm" aria-hidden="true"></span></button>
-    <div class="acm-p" id="acm-p${k}" role="region" aria-labelledby="acm-h${k}" inert><span class="acm-bg" aria-hidden="true">${img(root, im, '', '', 'sizes="100vw"')}</span>
+    <div class="acm-p" id="acm-p${k}" role="region" aria-labelledby="acm-h${k}" inert><span class="acm-bg${im ? '' : ' acm-bg-glow'}" aria-hidden="true">${im ? img(root, im, '', '', 'sizes="100vw"') : ''}</span>
       <div class="acm-sub">${cols.map(([h, ls]) => `<div class="acm-col"><p class="mono acm-ch">${h || '&nbsp;'}</p>${ls.join('')}</div>`).join('')}</div></div>
   </li>`).join('')}</ul>
   <div class="acm-foot mono"><a href="mailto:support@justuseflint.com">support@justuseflint.com</a><span class="acm-fm">Flint Marketing — Est. 2026</span><span class="acm-fr">${L('Home', '')}${L('News', 'news/')}${L('Contact', 'contact/')}</span></div>
