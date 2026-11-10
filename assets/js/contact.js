@@ -238,7 +238,7 @@
       .then(function () { clearTimeout(to); done(ref); })
       .catch(function (e) {
         clearTimeout(to); next.disabled = false; back.disabled = false; next.querySelector('span').textContent = 'Try again';
-        if (errEl) { errEl.hidden = false; errEl.querySelector('[data-send-why]').textContent = e && e.message ? ' (' + e.message + ')' : ''; }
+        if (errEl) errEl.hidden = false;
         fit(); if (window.console) console.warn('Flint form:', e && e.message);
       });
   }
