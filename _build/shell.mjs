@@ -1,8 +1,15 @@
 import { areas, areaOrder, TZ, services, cases } from './data.mjs';
 export const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+import { readFileSync } from 'node:fs';
+const MAN = JSON.parse(readFileSync(new URL('./img.json', import.meta.url), 'utf8'));
 const LAND = /hero|studio$|-map$|-palettes$|-deer$/;
-export const DIM = n => LAND.test(n) ? [1024, 576] : n === 'studio-2' ? [1024, 768] : [768, 1024];
-export const img = (root, n, alt = '', cls = '', extra = '') => { const [w, h] = DIM(n); return `<img src="${root}assets/img/${n}.webp" alt="${esc(alt)}" width="${w}" height="${h}" loading="lazy" decoding="async"${cls ? ` class="${cls}"` : ''}${extra ? ' ' + extra : ''}>`; };
+export const DIM = n => MAN[n] ? [MAN[n].w, MAN[n].h] : LAND.test(n) ? [1024, 576] : n === 'studio-2' ? [1024, 768] : [768, 1024];
+// Responsive <img>: every image in img.json gets a webp srcset; pass sizes="..." in extra to override the default.
+export const img = (root, n, alt = '', cls = '', extra = '') => {
+  const [w, h] = DIM(n); const m = MAN[n];
+  const set = m ? ` srcset="${m.ws.map(x => `${root}assets/img/${n}-${x}.webp ${x}w`).join(', ')}"${/sizes=/.test(extra) ? '' : ' sizes="100vw"'}` : '';
+  return `<img src="${root}assets/img/${n}.webp"${set} alt="${esc(alt)}" width="${w}" height="${h}"${/loading=/.test(extra) ? '' : ' loading="lazy"'} decoding="async"${cls ? ` class="${cls}"` : ''}${extra ? ' ' + extra : ''}>`;
+};
 export const arrow = `<svg class="arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`;
 // Wordmark: "Flint" with the accent square riding on the dotless i
 export const logo = (big = false) => `<span class="wm${big ? ' wm-big' : ''}" aria-label="Flint"><span aria-hidden="true">Fl</span><span class="wm-i" aria-hidden="true">ı<i></i></span><span aria-hidden="true">nt</span></span>`;
@@ -10,7 +17,7 @@ export const countyList = areaOrder.map(c => `${c} County`);
 
 const NAV = [['Work', 'work/', cases.length], ['Services', 'services/', services.length], ['About', 'about/'], ['Clients', 'clients/'], ['News', 'news/']];
 // Island preview slab: one image + line per destination
-const SLAB = { 'work/': ['aerial-hunter-hero', 'Case studies, including Aerial Hunter'], 'services/': ['kettle-hero', 'Six practices, one team'], 'about/': ['studio', 'Founded 2026 in west-central Indiana'], 'clients/': ['norrow-hero', 'Who we work with'], 'news/': ['studio-2', 'News and thinking'], 'contact/': ['halden-hero', 'Start a project with us'] };
+const SLAB = { 'work/': ['aerial-hunter-hero', 'Aerial Hunter and Casa Fresca'], 'services/': ['casa-fresca-how', 'Six practices, one team'], 'about/': ['studio', 'Founded 2026 in west-central Indiana'], 'clients/': ['casa-fresca-hero', 'Who we work with'], 'news/': ['studio-2', 'News and thinking'], 'contact/': ['hero-pill', 'Start a project with us'] };
 
 export function header(root, path) {
   const cur = p => p && path.startsWith(p) ? ' aria-current="page"' : '';
@@ -32,7 +39,7 @@ export function header(root, path) {
     <div class="isl-panel" id="isl-panel" data-isl-panel aria-hidden="true" inert>
       <nav class="isl-nav" aria-label="Site menu">${links.map(([t, h], i) => `<a class="isl-link${h === 'contact/' ? ' isl-link-sm' : ''}" href="${root}${h}"${cur(h)} data-isl-key="${h || 'home'}"><span class="mono">0${i + 1}</span>${t}</a>`).join('')}</nav>
       <div class="isl-slab" aria-hidden="true">
-        <span class="isl-media">${img(root, 'aerial-hunter-hero', '', 'on', 'data-isl-img="home"')}${Object.entries(SLAB).map(([k, [n]]) => img(root, n, '', '', `data-isl-img="${k}"`)).join('')}</span>
+        <span class="isl-media">${img(root, 'aerial-hunter-hero', '', 'on', 'data-isl-img="home" sizes="360px"')}${Object.entries(SLAB).map(([k, [n]]) => img(root, n, '', '', `data-isl-img="${k}" sizes="360px"`)).join('')}</span>
         <span class="isl-cap"><span class="mono" data-isl-idx>Flint</span><span data-isl-txt>Brand &amp; marketing, west-central Indiana</span></span>
         <span hidden data-isl-captions='${esc(JSON.stringify(Object.fromEntries(Object.entries(SLAB).map(([k, v]) => [k, v[1]]))))}'></span>
       </div>

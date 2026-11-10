@@ -1,6 +1,6 @@
 import { esc, img, arrow, page, logo, countyList } from './shell.mjs';
-import { cases, services, clients, clientSectors, news, areas, areaOrder, TZ } from './data.mjs';
-import { fmtDate, count } from './pages-a.mjs';
+import { cases, services, news, areas, areaOrder, TZ } from './data.mjs';
+import { fmtDate, brandWall } from './pages-a.mjs';
 
 export function servicesIndex() {
   const root = '../';
@@ -9,7 +9,7 @@ export function servicesIndex() {
 <section class="phero wrap svc-hero">
   <p class="eyebrow" data-fade>Services — six practices, one team</p>
   <h1 class="h-xxl roller-h"><span data-split="hero">We do</span> <span class="roller" data-roller aria-label="${services.map(s => s.short).join(', ')}"><span class="roller-in">${services.map(s => `<span>${s.short}.</span>`).join('')}<span>${services[0].short}.</span></span></span></h1>
-  <p class="lead phero-lede" data-fade>Most clients start with one practice and stay for three. Every team is led by a partner, staffed across disciplines and measured against the same business objectives you are.</p>
+  <p class="lead phero-lede" data-fade>Most clients start with a website or one practice on a monthly membership and add more as they grow. Every project has one named lead and a reply within one business day.</p>
 </section>
 <section class="wrap svc-acc" aria-label="Services">
   ${services.map((s, i) => `<details class="acc" data-reveal${i ? '' : ' open'}>
@@ -23,29 +23,29 @@ export function servicesIndex() {
 </section>
 <section class="process" data-process aria-labelledby="proc-h">
   <div class="wrap">
-    <div class="sec-head"><h2 id="proc-h" class="h-l" data-split>How every project runs</h2><p class="mono sec-meta">Average engagement: 7 months</p></div>
+    <div class="sec-head"><h2 id="proc-h" class="h-l" data-split>How every project runs</h2><p class="mono sec-meta">Monthly memberships for local businesses</p></div>
     <ol class="proc">
-      ${[['Discover', 'Weeks 1–3', 'We listen before we make anything: stakeholders, customers, data and the category.'], ['Define', 'Weeks 3–6', 'One brief, one objective set, signed off by marketing and finance together.'], ['Design', 'Weeks 6–16', 'Senior teams make the work, test it with real people and refine it fast.'], ['Deliver', 'Week 16 →', 'Launch, measure, optimise. A monthly effectiveness review for the first year.']].map((p, i) => `<li class="proc-s"><span class="proc-dot"><i></i></span><span class="mono">0${i + 1} · ${p[1]}</span><h3>${p[0]}</h3><p>${p[2]}</p></li>`).join('')}
+      ${[['Discover', 'Week 1', 'We listen before we make anything: you, your customers, your numbers and your competition.'], ['Define', 'Weeks 1–2', 'One short brief and a few clear goals, signed off by you before work starts.'], ['Design', 'Weeks 2–6', 'We make the work, test it with real customers where we can and refine it fast.'], ['Deliver', 'Then monthly', 'Launch, measure, improve. A monthly check-in on what is working.']].map((p, i) => `<li class="proc-s"><span class="proc-dot"><i></i></span><span class="mono">0${i + 1} · ${p[1]}</span><h3>${p[0]}</h3><p>${p[2]}</p></li>`).join('')}
     </ol>
     <div class="proc-line" aria-hidden="true"><span data-proc-line></span></div>
   </div>
 </section>
 <section class="wrap caps-cloud" aria-labelledby="caps-h">
-  <div class="sec-head"><h2 id="caps-h" class="h-l" data-split>Capabilities</h2><p class="mono sec-meta">${allCaps.length} disciplines in-house</p></div>
+  <div class="sec-head"><h2 id="caps-h" class="h-l" data-split>Capabilities</h2><p class="mono sec-meta">${allCaps.length} things we can help with</p></div>
   <ul class="cloud">${allCaps.map(c => `<li data-magnetic data-strength="0.25">${c}</li>`).join('')}</ul>
 </section>
 <section class="wrap models grid" aria-labelledby="mod-h">
-  <h2 id="mod-h" class="h-m models-h" data-split>Three ways to work with us</h2>
+  <h2 id="mod-h" class="h-m models-h" data-split>How memberships work</h2>
   <div class="models-list">
-    ${[['Project', 'A defined scope, a fixed fee and a launch date. Typically 8–20 weeks.', 'Best for rebrands, launches and campaigns.'], ['Retainer', 'A dedicated team on a monthly fee with quarterly objectives.', 'Best for always-on content, media and product.'], ['Embedded', 'Flint strategists, designers or analysts working inside your team.', 'Best for in-house teams that need senior capacity.']].map((m, i) => `<div class="model" data-reveal><span class="mono">0${i + 1}</span><h3>${m[0]}</h3><p>${m[1]}</p><p class="mono model-b">${m[2]}</p></div>`).join('')}
+    ${[['Membership', 'One monthly fee, from $100 to $5,000 a month, for your website and the work we agree together each month.', 'Best for most local businesses.'], ['Project', 'A defined scope and a fixed price, agreed up front.', 'Best for a new site, a rebrand or a launch.'], ['Add-on', 'Extra work, such as a campaign or a photo day, added to a membership month.', 'Best when something big is coming up.']].map((m, i) => `<div class="model" data-reveal><span class="mono">0${i + 1}</span><h3>${m[0]}</h3><p>${m[1]}</p><p class="mono model-b">${m[2]}</p></div>`).join('')}
   </div>
 </section>`;
-  return page({ root, path: 'services/', title: 'Services — Flint', desc: 'Brand strategy, identity, campaigns, performance media, social and digital product from one independent team.', body, cls: 'p-services' });
+  return page({ root, path: 'services/', title: 'Services — Flint', desc: 'Brand strategy, identity, campaigns, media, social and websites for local businesses, on a monthly membership.', body, cls: 'p-services' });
 }
 
 export function servicePage(s, i) {
   const root = '../../';
-  const work = s.work.map(slug => cases.find(c => c.slug === slug));
+  const work = (s.work.length ? s.work : cases.map(c => c.slug)).map(slug => cases.find(c => c.slug === slug));
   const body = `
 <section class="phero wrap svp-hero">
   <p class="eyebrow" data-fade><a class="ul" href="../">Services</a> / ${s.n} of 0${services.length}</p>
@@ -68,8 +68,8 @@ export function servicePage(s, i) {
   </div>
 </section>
 <section class="wrap svp-work" aria-labelledby="sw-h">
-  <div class="sec-head"><h2 id="sw-h" class="h-l" data-split>Related work</h2><a class="link-arrow sec-link" href="${root}work/">All work ${arrow}</a></div>
-  <ul class="rw">${work.map(c => `<li data-reveal><a href="${root}work/${c.slug}/" data-cursor="View"><span class="rw-m" data-img-reveal>${img(root, c.slug + '-2', c.client)}</span><span class="rw-c">${c.client}</span><span class="rw-t">${c.title}</span><span class="mono rw-r">${c.metrics ? `${c.metrics[0].prefix || ''}${c.metrics[0].v}${c.metrics[0].suffix} ${c.metrics[0].label.toLowerCase()}` : `${c.built[0].v} ${c.built[0].label.toLowerCase()}`}</span></a></li>`).join('')}</ul>
+  <div class="sec-head"><h2 id="sw-h" class="h-l" data-split>${s.work.length ? 'Related work' : 'Recent work'}</h2><a class="link-arrow sec-link" href="${root}work/">All work ${arrow}</a></div>
+  <ul class="rw">${work.map(c => `<li data-reveal><a href="${root}work/${c.slug}/" data-cursor="View"><span class="rw-m" data-img-reveal>${img(root, c.slug + '-2', c.client, '', 'sizes="(min-width:900px) 30vw, 50vw"')}</span><span class="rw-c">${c.client}</span><span class="rw-t">${c.title}</span><span class="mono rw-r">${c.disc.join(' · ')}</span></a></li>`).join('')}</ul>
 </section>
 <section class="wrap grid faq" aria-labelledby="faq-h">
   <h2 id="faq-h" class="h-m" data-split>Questions we hear</h2>
@@ -118,39 +118,25 @@ export function about() {
 
 export function clientsPage() {
   const root = '../';
-  const sectorOf = c => Object.keys(clientSectors).find(k => clientSectors[k].includes(c)) || '';
-  const tq = ['kettle', 'volta', 'oree', 'brightwater'].map(sl => cases.find(c => c.slug === sl).quote);
   const body = `
 <section class="phero wrap">
-  <p class="eyebrow" data-fade>Clients</p>
+  <p class="eyebrow" data-fade>Clients — ${String(cases.length).padStart(2, '0')}</p>
   <h1 class="h-xxl" data-split="hero">Long <em class="serif-i">partnerships,</em> not projects.</h1>
-  <p class="lead phero-lede" data-fade>We build relationships meant to last, from a thermal drone pilot in Parke County to national consumer brands. Here are some of the companies we work with.</p>
+  <p class="lead phero-lede" data-fade>From a thermal drone pilot in Rockville to a meal-prep kitchen in Crawfordsville. These are the businesses we work with so far, and there is room on this wall for yours.</p>
 </section>
-<section class="wrap">
-  <div class="chips" role="group" aria-label="Filter by sector" data-sector-filter>
-    <button class="chip on" type="button" data-f="all" aria-pressed="true">All sectors</button>
-    ${Object.keys(clientSectors).map(k => `<button class="chip" type="button" data-f="${esc(k)}" aria-pressed="false">${k}</button>`).join('')}
-  </div>
-  <ul class="lwall">${clients.map((c, i) => { const cs = cases.find(x => x.client === c); return `<li class="lw-i" data-sector="${esc(sectorOf(c))}">${cs ? `<a href="${root}work/${cs.slug}/" data-cursor="Case">` : '<div>'}<span class="lg lg-${i % 6}">${c}</span><span class="mono lw-s">${sectorOf(c)}${cs ? ' · Case study ↗' : ''}</span>${cs ? '</a>' : '</div>'}</li>`; }).join('')}</ul>
-</section>
-<section class="wrap tq" aria-label="Testimonials">
-  <p class="eyebrow">What clients say</p>
-  <ul class="tq-list">${tq.map(q => `<li data-reveal><blockquote>“${q[0]}”</blockquote><p class="mono"><b>${q[1]}</b><br>${q[2]}</p></li>`).join('')}</ul>
-</section>`;
-  return page({ root, path: 'clients/', title: 'Clients — Flint', desc: 'The businesses Flint works with, from a Parke County drone pilot to banks, football clubs, tea makers and fragrance houses.', body, cls: 'p-clients' });
+<section class="wrap cl-wall">${brandWall(root, true)}</section>`;
+  return page({ root, path: 'clients/', title: 'Clients — Flint', desc: 'The businesses Flint works with: Aerial Hunter, a thermal drone search service, and Casa Fresca, a meal-prep and catering kitchen.', body, cls: 'p-clients' });
 }
 
 export const articles = {
-  'introducing-flint': ['Flint is an independent brand and marketing company founded in 2026 and based in west-central Indiana. It serves businesses across Montgomery, Tippecanoe, Fountain, Boone, Parke, Putnam and Clinton counties.', 'Flint brings six practices under one roof: brand strategy, identity and design, campaigns, performance media, social and content, and digital product, including websites built to turn a visitor into a phone call or an enquiry.', 'q:A business in Crawfordsville or Rockville deserves the same care as any national brand. That is the whole idea.', 'The company also goes by Flint Marketing and Just Use Flint. Its first published case study is the website for Aerial Hunter, a thermal drone search and recovery service based in Parke County.'],
-  'aerial-hunter-website-launch': ['Aerial Hunter, a thermal drone search and recovery service based in Parke County, Indiana, now has a website built by Flint at justuseflint.github.io/aerial-hunter.', 'Aerial Hunter is run by an FAA Part 107 certified pilot who flies a DJI Matrice 4T for deer recovery, lost-pet searches, herd counts and land checks across Parke County and the counties around it.', 'q:Someone who has just lost a blood trail or a dog is standing in a field with a phone. Everything on the site works back from that moment.', 'The ten-page site opens on a thermal view you can sweep with a cursor or a finger, shows one scene in four thermal palettes, maps the counties served and keeps tap-to-call and text one thumb away on every page.'],
-  'the-case-for-saying-less': ['We reviewed 2,400 pieces of financial services advertising. The average ad contained 38 words. The ones that performed best contained fewer than twelve.', 'This is not a new insight. Effectiveness research has pointed in the same direction for decades: brands grow by being easy to notice and easy to remember. And yet the pressure inside most companies pushes the other way. Every stakeholder wants their message included. Every message dilutes the others.', 'q:Strategy is the art of deciding what not to say. Most briefs fail because nobody was willing to make that decision.', 'At Flint we have a simple test. Before any brief leaves strategy, we ask whether a stranger could repeat the idea after hearing it once. If not, we keep editing.', 'Norrow is the clearest example. The brand has one rule: one idea at a time. It applies to ads, to app screens, to customer emails and to legal disclosures. It is harder to follow than it sounds. It is also the reason the brand is remembered.'],
-  'what-shift-workers-taught-us': ['When Lumen Health asked us to help their sleep app stand out, we started by asking who was being left out. The answer was one in five American workers.', 'Over six weeks, 140 shift workers kept sleep diaries for us: nurses, long-haul drivers, warehouse teams and air traffic controllers. Their days started at 7pm. Their advice from sleep apps assumed a 10pm bedtime.', 'q:Design for the edge case and you often discover the real case. Shift workers were not a niche. They were the people who needed sleep help most.', 'We learned to design around rotas rather than routines, to measure success in recovery rather than hours, and to show up in the places shift workers actually are at 3am: break rooms, overnight radio and late-night feeds.', 'The result was a product that doubled day-30 retention and a brand that 38 employers now offer to their staff.'],
+  'introducing-flint': ['Flint is an independent brand and marketing company founded in 2026 and based in west-central Indiana. It serves businesses across Montgomery, Tippecanoe, Fountain, Boone, Parke, Putnam and Clinton counties.', 'Flint brings six practices under one roof: brand strategy, identity and design, campaigns, performance media, social and content, and websites built to turn a visitor into a phone call, a booking or an order. Local businesses work with Flint on a monthly membership.', 'q:A business in Crawfordsville or Rockville deserves the same care as any national brand. That is the whole idea.', 'The company also goes by Flint Marketing and Just Use Flint. Its first case studies are the website for Aerial Hunter, a thermal drone search and recovery service based in Rockville, and a custom Shopify theme for Casa Fresca, a meal-prep and catering kitchen in Crawfordsville.'],
+  'aerial-hunter-website-launch': ['Aerial Hunter, a thermal drone search and recovery service based in Rockville, Indiana, now has a website built by Flint at justuseflint.github.io/aerial-hunter.', 'Aerial Hunter is run by an FAA Part 107 certified pilot who flies a DJI Matrice 4T for deer recovery, lost-pet searches, herd counts and land checks anywhere in Indiana.', 'q:Someone who has just lost a blood trail or a dog is standing in a field with a phone. Everything on the site works back from that moment.', 'The ten-page site opens on a thermal view you can sweep with a cursor or a finger, shows one scene in four thermal palettes, maps the whole state from home base in Rockville and keeps tap-to-call and text one thumb away on every page.'],
 };
 
 export function newsIndex() {
   const root = '../';
   const [f, ...rest] = news;
-  const types = ['Press release', 'News', 'Insight'];
+  const types = ['Press release', 'News'];
   const body = `
 <section class="phero wrap">
   <p class="eyebrow" data-fade>Newsroom — press releases, news and thinking</p>
@@ -214,8 +200,10 @@ export function contact() {
   </aside>
   <div class="ct-main">
     <div class="ct-prog" aria-hidden="true"><span data-prog></span></div>
-    <form class="ct-form" data-form novalidate autocomplete="on">
+    <form class="ct-form" data-form data-endpoint="https://formsubmit.co/ajax/support@justuseflint.com" novalidate autocomplete="on">
       <div class="ct-stage" data-stage aria-live="polite"></div>
+      <div class="hp" aria-hidden="true"><label for="f-hp">Leave this empty</label><input id="f-hp" type="text" name="_honey" tabindex="-1" autocomplete="off" data-hp></div>
+      <p class="ct-err" data-send-err role="alert" hidden>We couldn’t send that just now<span data-send-why></span>. Please try again, or email <a class="ul" href="mailto:support@justuseflint.com">support@justuseflint.com</a>.</p>
       <div class="ct-nav" data-nav>
         <button type="button" class="btn btn-ghost" data-back><span>← Back</span></button>
         <span class="ct-count mono" data-count-step></span>

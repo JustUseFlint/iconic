@@ -52,10 +52,10 @@ async def main():
         await pg.click('button[data-next]'); await pg.wait_for_timeout(900)
         await pg.click('.tchip:has-text("Not sure yet")'); await pg.click('.tchip:has-text("Just exploring")')
         await pg.click('button[data-next]'); await pg.wait_for_timeout(900)
-        await pg.fill('#f-name','Ana Ruiz'); await pg.fill('#f-email','bad-email'); await pg.fill('#f-company','Fennick')
+        await pg.fill('#f-name','Ana Ruiz'); await pg.fill('#f-email','bad-email'); await pg.fill('#f-company','Wabash Supply')
         await pg.click('button[data-next]'); await pg.wait_for_timeout(600)
         res['bad_email_blocked']=await pg.locator('.fld[data-k=email].err').count()==1
-        await pg.fill('#f-email','ana@fennick.example'); await pg.click('button[data-next]'); await pg.wait_for_timeout(900)
+        await pg.fill('#f-email','ana@wabash-supply.example'); await pg.click('button[data-next]'); await pg.wait_for_timeout(900)
         await pg.click('button[data-next]'); await pg.wait_for_timeout(1300)
         res['flow3_done']=await pg.locator('.done .ct-q').inner_text()
         print(json.dumps({'res':res,'errs':errs},indent=1,ensure_ascii=False))
