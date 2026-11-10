@@ -35,7 +35,7 @@
   function leave(href) {
     try { sessionStorage.setItem('fl-pt', '1'); } catch (e) {}
     if (!motion || !pt) { location.href = href; return; }
-    closeIsland(true);
+    closeIsland(true); closeAcm(true);
     gsap.fromTo(pt, { yPercent: 100 }, { yPercent: 0, duration: 0.65, ease: 'expo.inOut', onComplete: function () { location.href = href; } });
   }
   d.addEventListener('click', function (e) {
@@ -50,7 +50,7 @@
         if (t !== null) { e.preventDefault(); if (lenis) lenis.scrollTo(t, { duration: 1.4 }); else W.scrollTo({ top: t === 0 ? 0 : t.getBoundingClientRect().top + scrollY, behavior: RM ? 'auto' : 'smooth' }); }
         return;
       }
-      e.preventDefault(); closeIsland(); return;
+      e.preventDefault(); closeIsland(); closeAcm(); return;
     }
     e.preventDefault(); leave(url.href);
   });
@@ -152,7 +152,69 @@
   }
   W.addEventListener('scroll', setShown, { passive: true }); setShown();
   W.icIsland = { open: openIsland, close: closeIsland };
-  d.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeIsland(); closeReel(); } });
+  d.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (typeof closeAcm === 'function') closeAcm(); closeIsland(); closeReel(); } });
+
+  /* ---------- Accordion menu ----------
+     The header's dot-grid button opens a full-screen panel of four rows (Work, Services, Studio, Contact).
+     Opening a row grows it, reveals an image and its links, and dims the others. Escape closes. */
+  var acm = $('[data-acm]'), acmOpeners = $$('[data-acm-open]'), acmOn = false, acmTl = null, acmLast = null;
+  var acmRows = acm ? $$('[data-acm-row]', acm) : [], acmList = acm && $('.acm-list', acm);
+  function acmFocusables() { return $$('a[href],button:not([disabled])', acm).filter(function (el) { return !el.closest('[inert]') && el.offsetParent !== null; }); }
+  function setRow(row) {
+    acmRows.forEach(function (r) {
+      var on = r === row, h = $('.acm-h', r), p = $('.acm-p', r);
+      r.classList.toggle('is-on', on); h.setAttribute('aria-expanded', on ? 'true' : 'false');
+      if (on) p.removeAttribute('inert'); else p.setAttribute('inert', '');
+    });
+    if (acmList) acmList.classList.toggle('has-on', !!row);
+  }
+  function openAcm(from) {
+    if (!acm || acmOn) return;
+    acmOn = true; acmLast = from || d.activeElement; closeIsland(true);
+    $$('img', acm).forEach(function (im) { im.loading = 'eager'; });
+    acm.removeAttribute('inert'); acm.setAttribute('aria-hidden', 'false'); acm.classList.add('is-open'); H.classList.add('acm-open');
+    acmOpeners.forEach(function (b) { b.setAttribute('aria-expanded', 'true'); });
+    if (lenis) lenis.stop();
+    if (acmTl) acmTl.kill();
+    if (motion) {
+      var ts = $$('.acm-t>span', acm), ex = $$('.acm-n,.acm-pm,.acm-foot,.acm-top>*', acm);
+      acmTl = gsap.timeline();
+      acmTl.fromTo(acm, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.8, ease: 'expo.inOut' }, 0)
+        .fromTo(ex, { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.03 }, 0.35)
+        .fromTo(ts, { yPercent: 110 }, { yPercent: 0, duration: 0.9, ease: 'expo.out', stagger: 0.06 }, 0.42);
+    }
+    setTimeout(function () { var f = $('.acm-h', acm); if (f) f.focus({ preventScroll: true }); }, motion ? 450 : 0);
+  }
+  function closeAcm(instant) {
+    if (!acm || !acmOn) return;
+    acmOn = false; H.classList.remove('acm-open');
+    acmOpeners.forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+    acm.setAttribute('aria-hidden', 'true'); acm.setAttribute('inert', '');
+    var done = function () { acm.classList.remove('is-open'); setRow(null); if (W.gsap) gsap.set($$('.acm-t>span,.acm-n,.acm-pm,.acm-foot,.acm-top>*', acm).concat(acm), { clearProps: 'all' }); };
+    if (lenis) lenis.start();
+    if (acmTl) acmTl.kill();
+    if (motion && !instant) {
+      acmTl = gsap.timeline({ onComplete: done });
+      acmTl.to($$('.acm-t>span', acm), { yPercent: -110, duration: 0.35, ease: 'power2.in', stagger: 0.03 }, 0)
+        .to(acm, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.65, ease: 'expo.inOut' }, 0.15);
+    } else done();
+    if (!instant && acmLast && acmLast.focus && d.contains(acmLast)) acmLast.focus({ preventScroll: true });
+  }
+  if (acm) {
+    acmOpeners.forEach(function (b) { b.addEventListener('click', function () { if (acmOn) closeAcm(); else openAcm(b); }); });
+    $('[data-acm-close]', acm).addEventListener('click', function () { closeAcm(); });
+    acmRows.forEach(function (r) { $('.acm-h', r).addEventListener('click', function () { setRow(r.classList.contains('is-on') ? null : r); }); });
+    acm.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var f = acmFocusables(); if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && d.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && d.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    // a click on the panel's empty space (not a row, link or button) closes it
+    acm.addEventListener('click', function (e) { if (e.target === acm || e.target.classList.contains('acm-top')) closeAcm(); });
+  }
+  W.icAcm = { open: openAcm, close: closeAcm };
 
   /* ---------- Live local clocks ---------- */
   var clocks = $$('[data-clock]');

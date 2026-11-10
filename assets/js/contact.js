@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var root = document.querySelector('[data-contact]'); if (!root) return;
-  var d = document, G = window.gsap, RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var d = document, H = d.documentElement, G = window.gsap, RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stage = root.querySelector('[data-stage]'), form = root.querySelector('[data-form]'), back = root.querySelector('[data-back]'), next = root.querySelector('[data-next]'), prog = root.querySelector('[data-prog]'), stepsEl = root.querySelector('[data-steps]'), countEl = root.querySelector('[data-count-step]');
   // Delivery: FormSubmit (free) emails every inquiry to the address in data-endpoint. Set data-w3f-key to use Web3Forms instead.
   var ENDPOINT = form.getAttribute('data-endpoint') || '', W3F = form.getAttribute('data-w3f-key') || '';
@@ -223,7 +223,7 @@
     var ref = 'FL-26-' + String(Math.floor(1000 + Math.random() * 9000));
     var hp = form.querySelector('[data-hp]');
     if (hp && hp.value) return done(ref); // bots fill the hidden field; pretend it worked
-    if (!ENDPOINT && !W3F) return done(ref);
+    if (!ENDPOINT && !W3F) return success(ref);
     var rows = payloadFor(ref), name = state.a.name || 'someone';
     var subject = 'New Flint inquiry: ' + svcName(state.service) + ' from ' + name;
     var body = {};
@@ -235,14 +235,85 @@
     var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.success === false || j.success === 'false') throw new Error(j.message || ('HTTP ' + r.status)); return j; }); })
-      .then(function () { clearTimeout(to); done(ref); })
+      .then(function () { clearTimeout(to); success(ref); })
       .catch(function (e) {
         clearTimeout(to); next.disabled = false; back.disabled = false; next.querySelector('span').textContent = 'Try again';
         if (errEl) errEl.hidden = false;
         fit(); if (window.console) console.warn('Flint form:', e && e.message);
       });
   }
-  function done(ref) {
+
+  /* ---------- Success transition: a distortion wave ----------
+     Plays only after the endpoint confirms the send. A ring of light radiates from the Send button; as it passes,
+     the page bends (SVG displacement), splits into red/green/blue fringes and blurs inside the band. When the wave
+     has crossed most of the screen the success screen is swapped in underneath, and the ring runs out to the edges. */
+  function success(ref) {
+    if (RM || !window.requestAnimationFrame) return done(ref);
+    var b = next.getBoundingClientRect(), ox = b.left + b.width / 2, oy = b.top + b.height / 2;
+    var vw = innerWidth, vh = innerHeight;
+    var maxR = Math.max(Math.hypot(ox, oy), Math.hypot(vw - ox, oy), Math.hypot(ox, vh - oy), Math.hypot(vw - ox, vh - oy));
+    var W = Math.max(110, Math.min(vw, vh) * 0.26), DUR = 1500, swapped = false;
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = d.createElementNS(NS, 'svg'); svg.setAttribute('class', 'fw-defs'); svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML = '<filter id="fw-f" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">' +
+      '<feTurbulence type="fractalNoise" baseFrequency="0.006 0.018" numOctaves="2" seed="7" result="n"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
+      '<feColorMatrix in="d" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="r"/><feOffset in="r" dx="0" dy="0" result="ro"/>' +
+      '<feColorMatrix in="d" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="g"/>' +
+      '<feColorMatrix in="d" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="b"/><feOffset in="b" dx="0" dy="0" result="bo"/>' +
+      '<feBlend in="ro" in2="g" mode="screen" result="rg"/><feBlend in="rg" in2="bo" mode="screen"/></filter>';
+    d.body.appendChild(svg);
+    var disp = svg.querySelector('feDisplacementMap'), offs = svg.querySelectorAll('feOffset');
+    var band = d.createElement('div'); band.className = 'fw-band'; band.setAttribute('aria-hidden', 'true'); d.body.appendChild(band);
+    var cv = d.createElement('canvas'); cv.className = 'fw-cv'; cv.setAttribute('aria-hidden', 'true'); d.body.appendChild(cv);
+    var dpr = Math.min(devicePixelRatio || 1, 2); cv.width = vw * dpr; cv.height = vh * dpr;
+    var gl = null, prog = null, U = {};
+    try { gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true }); } catch (e) {}
+    if (gl) {
+      var sh = function (t, src) { var o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+      prog = gl.createProgram();
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));
+      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float;uniform vec2 O;uniform float R,Wd,A,T,S;' +
+        'float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}' +
+        'void main(){vec2 q=gl_FragCoord.xy/S;vec2 v=q-O;float dd=length(v);float x=(dd-R)/Wd;' +
+        'float body=exp(-x*x*5.);float lead=exp(-pow((x-.42)/.07,2.));float tail=exp(-pow((x+.55)/.12,2.))*.5;' +
+        'float an=atan(v.y,v.x);vec3 c=.55+.45*cos(6.2832*(fract(an/6.2832+dd*.0012-T*.35)+vec3(0.,.33,.67)));' +
+        'float sp=step(.9965,h(floor(q/2.)+floor(T*24.)))*body;' +
+        'float a=clamp((body*.22+lead*.75+tail+sp)*A,0.,1.);gl_FragColor=vec4(mix(c,vec3(1.),lead*.35+sp)*a,a);}'));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) gl = null;
+      else {
+        gl.useProgram(prog);
+        var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+        var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        ['O', 'R', 'Wd', 'A', 'T', 'S'].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k); });
+        gl.uniform2f(U.O, ox, vh - oy); gl.uniform1f(U.Wd, W); gl.uniform1f(U.S, dpr);
+        gl.viewport(0, 0, cv.width, cv.height);
+      }
+    }
+    root.classList.add('fw-on'); H.classList.add('fw-run');
+    var t0 = performance.now();
+    var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+    (function frame(now) {
+      var t = Math.min(1, (now - t0) / DUR), r = ease(t) * (maxR + W * 1.2);
+      var k = Math.sin(Math.PI * Math.min(1, t * 1.15)); // distortion strength: up, then back to rest
+      disp.setAttribute('scale', (k * 16).toFixed(2));
+      offs[0].setAttribute('dx', (k * 4).toFixed(2)); offs[1].setAttribute('dx', (-k * 4).toFixed(2));
+      offs[0].setAttribute('dy', (k * 1.5).toFixed(2)); offs[1].setAttribute('dy', (-k * 1.5).toFixed(2));
+      var m = 'radial-gradient(circle at ' + ox + 'px ' + oy + 'px, transparent ' + Math.max(0, r - W * 0.9) + 'px, #000 ' + Math.max(0, r - W * 0.15) + 'px, #000 ' + (r + W * 0.2) + 'px, transparent ' + (r + W * 0.5) + 'px)';
+      band.style.webkitMaskImage = m; band.style.maskImage = m; band.style.opacity = String(1 - Math.max(0, t - 0.8) / 0.2);
+      if (gl) {
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(U.R, r); gl.uniform1f(U.T, (now - t0) / 1000); gl.uniform1f(U.A, Math.min(1, t * 6) * (1 - Math.max(0, t - 0.78) / 0.22));
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+      if (!swapped && r > maxR * 0.5) { swapped = true; done(ref, true); }
+      if (t < 1) requestAnimationFrame(frame);
+      else { root.classList.remove('fw-on'); H.classList.remove('fw-run'); svg.remove(); band.remove(); cv.remove(); if (!swapped) done(ref, true); }
+    })(t0);
+  }
+  function done(ref, waved) {
     var first = (state.a.name || '').split(' ')[0] || 'there';
     if (errEl) errEl.hidden = true;
     var s = state.service, steps;
@@ -260,7 +331,7 @@
     stepsEl.querySelectorAll('li').forEach(function (li) { li.className = 'done'; li.lastChild.textContent = 'Done'; });
     fit();
     stage.querySelector('.ct-q').focus({ preventScroll: true });
-    if (G && !RM) G.fromTo(stage.querySelectorAll('.done > *'), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.07 });
+    if (G && !RM) G.fromTo(stage.querySelectorAll('.done > *'), { opacity: 0, y: waved ? 14 : 24, scale: waved ? 0.985 : 1 }, { opacity: 1, y: 0, scale: 1, duration: waved ? 1.1 : 0.9, ease: 'expo.out', stagger: waved ? 0.05 : 0.07 });
   }
 
   if (state.service && params.get('service')) step = 1;

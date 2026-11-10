@@ -8,20 +8,17 @@ const count = (m) => `<span data-count="${m.v}" data-dec="${m.dec || 0}" data-pr
 export { count };
 
 
-export const brandWall = (root, big = false) => `<ul class="bw${big ? ' bw-big' : ''}">${cases.map((c, i) => `<li class="bw-i bw-${c.slug}" data-reveal><a href="${root}work/${c.slug}/" data-cursor="Case">
-    <span class="bw-logo"><img src="${root}assets/img/logo-${c.slug}.webp" alt="${esc(c.client)}" loading="lazy" decoding="async"></span>
+export const brandWall = (root, big = false) => `<div class="bw-wrap${big ? ' bw-big' : ''}"><ul class="bw">${cases.map((c, i) => `<li class="bw-i bw-${c.slug}" data-reveal><a href="${root}work/${c.slug}/" data-cursor="Case">
+    <span class="bw-logo"><span class="mono bw-k">${String(i + 1).padStart(2, '0')}</span><img src="${root}assets/img/logo-${c.slug}.webp" alt="${esc(c.client)}" loading="lazy" decoding="async"></span>
     <span class="bw-meta"><span class="bw-n">${c.client}</span><span class="mono bw-s">${c.sector} · ${c.town}</span><span class="mono bw-go">Case study ${arrow}</span></span>
-  </a></li>`).join('')}
-  <li class="bw-i bw-next" data-reveal><a href="${root}contact/" data-cursor="Start"><span class="bw-plus" aria-hidden="true">+</span><span class="bw-meta"><span class="bw-n">Your business next</span><span class="mono bw-s">Monthly memberships for local businesses</span><span class="mono bw-go">Start a project ${arrow}</span></span></a></li>
-</ul>`;
+  </a></li>`).join('')}</ul>
+  <a class="bw-cta" href="${root}contact/" data-cursor="Start" data-reveal><span class="bw-plus" aria-hidden="true"><span>+</span></span><span class="bw-ct"><span class="bw-cn">Your business next</span><span class="mono bw-cs">${String(cases.length + 1).padStart(2, '0')} · Monthly memberships for local businesses, from $100 a month</span></span><span class="btn bw-cb"><span>Start a project</span></span></a>
+</div>`;
 
 export function home() {
   const root = '';
   const body = `
 <section class="hero wrap">
-  <div class="hero-meta mono" data-fade>
-    <span>Independent brand &amp; marketing company</span><span>Est. 2026</span><span class="hide-s">West-central Indiana · Seven counties</span>
-  </div>
   <h1 class="hero-h" data-split="hero">We make brands <span class="pill" aria-hidden="true">${img(root, 'hero-pill', '', 'on', 'loading="eager" fetchpriority="high" sizes="240px"')}</span> impossible <em class="serif-i">to&nbsp;ignore.</em></h1>
   <div class="hero-foot">
     <p class="lead hero-lede" data-fade>Flint helps ambitious companies find the one idea worth repeating, and then makes sure the right people hear it.</p>
@@ -127,7 +124,7 @@ export function workIndex() {
   </ul>
   </section>
 `;
-  return page({ root, path: 'work/', title: 'Work — Flint', desc: 'Case studies from Flint: the Aerial Hunter website and the Casa Fresca Shopify theme.', body, cls: 'p-work' });
+  return page({ root, path: 'work/', title: 'Work — Flint', desc: 'Case studies from Flint: websites for Aerial Hunter, Conexus Design and Bertram’s Elite Mobile Detailing, and the Casa Fresca Shopify theme.', body, cls: 'p-work' });
 }
 
 export function caseStudy(c, i) {

@@ -6,6 +6,10 @@ MAP={'aerial-hunter-hero':'ah-hero.jpg','aerial-hunter-deer':'ah-deer.jpg','aeri
  'casa-fresca-hero':'cf-hero.png','casa-fresca-how':'cf-how.png','casa-fresca-catering':'cf-catering.png','casa-fresca-product':'cf-product.png','casa-fresca-events':'cf-events.png','casa-fresca-macro':'cf-macro.png','casa-fresca-2':'cf-phone.png','casa-fresca-cart-m':'cf-phone-cart.png',
  'aerial-hunter-plate-scan':'ah-plate-scan.png','aerial-hunter-plate-tools':'ah-plate-tools.png','aerial-hunter-plate-call':'ah-plate-call.png',
  'casa-fresca-plate-menu':'cf-plate-menu.png','casa-fresca-plate-week':'cf-plate-week.png','casa-fresca-plate-extras':'cf-plate-extras.png',
+ 'conexus-design-hero':'cx-hero.png','conexus-design-2':'cx-phone.png','conexus-design-plate-first':'cx-plate-first.png','conexus-design-plate-portfolio':'cx-plate-portfolio.png','conexus-design-plate-practice':'cx-plate-practice.png',
+ 'conexus-design-map':'cx-map.png','conexus-design-project':'cx-project.png','conexus-design-services':'cx-services.png','conexus-design-states':'cx-states.png','conexus-design-projects-m':'cx-phone-projects.png','conexus-design-project-m':'cx-phone-project.png',
+ 'bertrams-hero':'bt-hero.png','bertrams-2':'bt-phone.png','bertrams-plate-services':'bt-plate-services.png','bertrams-plate-work':'bt-plate-work.png','bertrams-plate-quote':'bt-plate-quote.png',
+ 'bertrams-marine':'bt-marine.png','bertrams-ceramic':'bt-ceramic.png','bertrams-mega':'bt-mega.png','bertrams-reviews':'bt-reviews.png','bertrams-services-m':'bt-phone-services.png','bertrams-quote-m':'bt-phone-quote.png',
  'hero-pill':'hero-pill.webp'}
 man={}
 for n,src in MAP.items():
