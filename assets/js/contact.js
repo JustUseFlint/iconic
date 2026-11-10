@@ -230,7 +230,7 @@
     rows.forEach(function (r) { body[r[0]] = r[1]; });
     var url = ENDPOINT;
     if (W3F) { url = 'https://api.web3forms.com/submit'; body.access_key = W3F; body.subject = subject; body.from_name = 'Flint website'; body.email = state.a.email || ''; body.name = name; body.botcheck = false; }
-    else { body._subject = subject; body._template = 'table'; body._captcha = 'false'; body._replyto = state.a.email || ''; body._honey = ''; }
+    else { body._subject = subject; body._template = 'table'; body._captcha = 'false'; body._replyto = state.a.email || ''; body._honey = ''; if (form.getAttribute('data-cc')) body._cc = form.getAttribute('data-cc'); }
     next.disabled = true; back.disabled = true; next.querySelector('span').textContent = 'Sending…'; if (errEl) errEl.hidden = true;
     var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined })
