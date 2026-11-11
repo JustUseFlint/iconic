@@ -1,5 +1,5 @@
-import { esc, img, arrow, page, countyList } from './shell.mjs';
-import { cases, services, stats, news } from './data.mjs';
+import { esc, img, arrow, page, stateList } from './shell.mjs';
+import { cases, services, stats, news, region, regionLong } from './data.mjs';
 
 const fmtDate = d => new Date(d + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 export { fmtDate };
@@ -26,18 +26,20 @@ export function home() {
   </div>
 </section>
 
-<section class="reel" data-reel-section>
-  <div class="reel-frame" data-expand>
-    <div class="reel-media" data-reel-slides>${cases.map((c, i) => img(root, c.slug + '-hero', '', i ? '' : 'on', i < 2 ? 'loading="eager"' : '')).join('')}</div>
-    <div class="reel-cap mono"><span>Showreel 2026</span><span data-reel-name data-names="${esc(cases.map(c => c.client).join('|'))}">${cases[0].client}</span></div>
-    <button class="reel-play" type="button" data-reel-open data-magnetic data-strength="0.5" data-cursor="Play"><span>Play<br>reel</span></button>
-  </div>
+<section class="lx wrap" aria-labelledby="lx-h">
+  <div class="sec-head"><h2 id="lx-h" class="h-l" data-split>Launched this year</h2><p class="mono sec-meta">(${String(cases.length).padStart(2, '0')} sites)</p><a class="link-arrow sec-link" href="work/">All work ${arrow}</a></div>
+  <ul class="lx-grid">
+    ${cases.map((c, i) => `<li class="lx-i" data-reveal><a href="work/${c.slug}/" data-cursor="View">
+      <span class="lx-m" style="--lx-bg:${c.theme.bg}">${img(root, c.slug + '-hero', c.client + ': ' + c.title, '', `sizes="(min-width:900px) 50vw, 100vw"${i < 2 ? ' loading="eager"' : ''}`)}</span>
+      <span class="lx-txt"><span class="mono lx-k">${String(i + 1).padStart(2, '0')} · ${c.sector}</span><span class="lx-c">${c.client}</span><span class="lx-d">${c.lede.split('. ')[0].replace(/\.$/, '')}.</span><span class="mono lx-tags">${c.disc.join(' · ')} ${arrow}</span></span>
+    </a></li>`).join('')}
+  </ul>
 </section>
 
 <section class="statement wrap grid">
   <p class="eyebrow st-eb" data-fade>(About Flint)</p>
   <div class="st-body">
-    <p class="focus" data-focus>Flint is an independent brand and marketing company, founded in 2026 in west-central Indiana. We bring strategy, identity, campaigns, media, social and websites under one roof for businesses across seven counties, from Lafayette to Greencastle.</p>
+    <p class="focus" data-focus>Flint is an independent brand and marketing company, founded in 2026 in Indiana. We bring strategy, identity, campaigns, media, social and websites under one roof for businesses across Indiana and the surrounding states: Illinois, Michigan, Kentucky, Tennessee and Ohio.</p>
     <a class="link-arrow" href="about/">Our story ${arrow}</a>
   </div>
 </section>
@@ -63,9 +65,9 @@ export function home() {
 
 <section class="numbers" aria-label="Flint in numbers">
   <div class="wrap">
-    <div class="num-head"><p class="eyebrow">Flint in numbers</p><p class="num-note">Independent, and based in Indiana.</p></div>
+    <div class="num-head"><p class="eyebrow">Flint in numbers</p><p class="num-note">Independent, based in Indiana, working across the region.</p></div>
     <div class="num-grid">${stats.map(s => `<div class="num" data-reveal><span class="num-v">${count(s)}</span><span class="num-l">${s.label}</span></div>`).join('')}</div>
-    <div class="awards-row mono">${countyList.map(c => `<span>${c}</span>`).join('')}</div>
+    <div class="awards-row mono">${stateList.map(c => `<span>${c}</span>`).join('')}</div>
   </div>
 </section>
 
@@ -86,9 +88,9 @@ export function home() {
   </div>
 </section>
 
-<section class="logos bw-sec wrap" aria-labelledby="bw-h">
-  <div class="sec-head"><h2 id="bw-h" class="eyebrow">Brands we work with</h2><a class="link-arrow sec-link" href="clients/">Clients ${arrow}</a></div>
-  ${brandWall(root)}
+<section class="logos" aria-label="Brands we work with">
+  <div class="wrap sec-head"><p class="eyebrow">Brands we work with</p><a class="link-arrow sec-link" href="clients/">Clients ${arrow}</a></div>
+  ${[cases, [...cases.slice(2), ...cases.slice(0, 2)]].map((row, r) => `<div class="marquee" data-marquee="${r ? -1 : 1}"><div class="mq-track">${[0, 1, 2].map(rep => row.map((c, i) => `<span class="lg lg-${(i + r * 3 + rep) % 6}"${rep ? ' aria-hidden="true"' : ''}>${c.client}</span>`).join('')).join('')}</div></div>`).join('\n  ')}
 </section>
 
 <section class="newsrow wrap" aria-labelledby="news-h">
@@ -98,12 +100,8 @@ export function home() {
   </ul>
 </section>
 
-<div class="reel-modal" data-reel-modal role="dialog" aria-modal="true" aria-label="Showreel" hidden>
-  <div class="rm-stage">${cases.map(c => `<figure class="rm-slide">${img(root, c.slug + '-hero', c.client)}<figcaption><span class="mono">${c.client} — ${c.year}</span><span class="rm-t">${c.title}</span></figcaption></figure>`).join('')}</div>
-  <div class="rm-bar"><span data-rm-progress></span></div>
-  <button class="rm-close mono" type="button" data-reel-close>Close ✕</button>
-</div>`;
-  return page({ root, path: '', title: 'Flint — Independent brand & marketing company in Indiana', desc: 'Flint (Flint Marketing) is an independent brand and marketing company founded in 2026, serving Montgomery, Tippecanoe, Fountain, Boone, Parke, Putnam and Clinton counties in Indiana.', body, cls: 'p-home' });
+`;
+  return page({ root, path: '', title: 'Flint — Independent brand & marketing company in Indiana', desc: `Flint (Flint Marketing) is an independent brand and marketing company founded in 2026, serving businesses across ${regionLong}.`, body, cls: 'p-home' });
 }
 
 export function workIndex() {
@@ -124,7 +122,7 @@ export function workIndex() {
   </ul>
   </section>
 `;
-  return page({ root, path: 'work/', title: 'Work — Flint', desc: 'Case studies from Flint: websites for Aerial Hunter, Conexus Design and Bertram’s Elite Mobile Detailing, and the Casa Fresca Shopify theme.', body, cls: 'p-work' });
+  return page({ root, path: 'work/', title: 'Work — Flint', desc: 'Case studies from Flint: websites for Aerial Hunter, Casa Fresca, Conexus Design and Bertram’s Elite Mobile Detailing.', body, cls: 'p-work' });
 }
 
 export function caseStudy(c, i) {
@@ -147,7 +145,15 @@ ${hero}
   <p class="eyebrow cs-k" data-fade>01 — The brief</p>
   <p class="focus" data-focus>${c.brief}</p>
 </section>
-<section class="cs-zoom" data-zoom aria-label="${esc(c.zoom)}"><div class="cz-in"><span class="cz-w">${c.zoom}</span></div></section>
+<section class="cs-show" aria-labelledby="show-${c.slug}">
+  <div class="wrap">
+    <div class="sh-head"><p class="eyebrow cs-k" data-fade>At a glance</p><h2 class="cs-h2" id="show-${c.slug}" data-split>${c.client}, on desktop and phone.</h2><a class="link-arrow mono sh-l" href="${c.site}" target="_blank" rel="noopener">${c.site.replace(/^https?:\/\//, '').replace(/\/$/, '')} ↗</a></div>
+    <div class="sh-stage">
+      <figure class="sh-desk" data-img-reveal>${img(root, c.gallery[0][0], `${c.client}: ${c.gallery[0][1]}`, '', 'sizes="(min-width:900px) 66vw, 100vw"')}<figcaption class="mono">${c.gallery[0][1]}</figcaption></figure>
+      <figure class="sh-phone" data-img-reveal>${img(root, c.phones[0][0], `${c.client}: ${c.phones[0][1]}`, '', 'sizes="(min-width:900px) 28vw, 60vw"')}<figcaption class="mono">${c.phones[0][1]}</figcaption></figure>
+    </div>
+  </div>
+</section>
 <section class="cs-sec wrap grid cs-insight">
   <p class="eyebrow cs-k" data-fade>02 — The insight</p>
   <div class="ci-body"><h2 class="cs-h2" data-split>${c.insightH}</h2><p class="ci-p" data-fade>${c.insight}</p></div>
@@ -165,8 +171,8 @@ ${hero}
 </section>
 <section class="cs-sec wrap cs-gallery" aria-labelledby="gal-${c.slug}">
   <div class="res-head"><p class="eyebrow cs-k">05 — The site</p><h2 class="cs-h2" id="gal-${c.slug}" data-split>${c.galleryH}</h2><p class="mono gal-note">${c.galleryNote}</p></div>
-  <ul class="gal">${c.gallery.map(([n, cap], k) => `<li class="gal-i${k === 0 ? ' gal-w' : ''}" data-reveal><a href="${c.site}" target="_blank" rel="noopener" data-cursor="Visit"><span class="gal-m" data-img-reveal>${img(root, n, `${c.client}: ${cap}`, '', k === 0 ? '' : half)}</span><span class="mono gal-c">${cap}</span></a></li>`).join('')}
-    ${c.phones.map(([n, cap]) => `<li class="gal-i gal-mob" data-reveal><a href="${c.site}" target="_blank" rel="noopener" data-cursor="Visit"><span class="gal-m gal-phone" data-img-reveal>${img(root, n, `${c.client}: ${cap}`, '', 'sizes="(min-width:900px) 25vw, 50vw"')}</span><span class="mono gal-c">${cap}</span></a></li>`).join('')}
+  <ul class="gal gal-r4">${c.gallery.slice(1).map(([n, cap], k) => `<li class="gal-i${k === 0 ? ' gal-w' : ''}" data-reveal><a href="${c.site}" target="_blank" rel="noopener" data-cursor="Visit"><span class="gal-m" data-img-reveal>${img(root, n, `${c.client}: ${cap}`, '', k === 0 ? '' : half)}</span><span class="mono gal-c">${cap}</span></a></li>`).join('')}
+    ${c.phones.slice(1).map(([n, cap]) => `<li class="gal-i gal-mob gal-solo" data-reveal><a href="${c.site}" target="_blank" rel="noopener" data-cursor="Visit"><span class="gal-m gal-phone" data-img-reveal>${img(root, n, `${c.client}: ${cap}`, '', 'sizes="(min-width:900px) 25vw, 50vw"')}</span><span class="mono gal-c">${cap}</span></a></li>`).join('')}
   </ul>
 </section>
 <section class="cs-credits wrap grid">
@@ -176,7 +182,7 @@ ${hero}
 </section>
 <section class="cs-next">
   <a href="../${next.slug}/" class="cn-a" data-cursor="Next">
-    <span class="cn-media">${img(root, next.slug + '-hero', '')}</span>
+    <span class="cn-media">${img(root, next.slug + '-hero', '', '', 'sizes="100vw"')}</span>
     <span class="cn-txt wrap"><span class="mono">Next case — ${String((i + 1) % cases.length + 1).padStart(2, '0')} / ${String(cases.length).padStart(2, '0')}</span><span class="cn-t">${next.client}</span><span class="cn-s">${next.title} ${arrow}</span></span>
   </a>
 </section>`;

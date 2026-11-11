@@ -1,7 +1,7 @@
 # Flint — agency website
 
 Website for **Flint** (Flint Marketing, Just Use Flint), an independent brand and marketing company founded in 2026,
-serving Montgomery, Tippecanoe, Fountain, Boone, Parke, Putnam and Clinton counties in Indiana.
+serving Indiana and the surrounding states (Illinois, Michigan, Kentucky, Tennessee, Ohio).
 
 **Live:** https://justuseflint.github.io/iconic/
 

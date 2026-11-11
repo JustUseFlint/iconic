@@ -1,5 +1,5 @@
-import { esc, img, arrow, page, logo, countyList } from './shell.mjs';
-import { cases, services, news, areas, areaOrder, TZ } from './data.mjs';
+import { esc, img, arrow, page, logo, stateList } from './shell.mjs';
+import { cases, services, news, states, stateOrder, region, regionLong } from './data.mjs';
 import { fmtDate, brandWall } from './pages-a.mjs';
 
 export function servicesIndex() {
@@ -84,7 +84,6 @@ export function servicePage(s, i) {
 
 export function about() {
   const root = '../';
-  const cols = Math.max(...areas.map(a => a.grid[0])), rows = Math.max(...areas.map(a => a.grid[1]));
   const body = `
 <section class="parting" data-parting aria-label="Independent since 2026">
   <div class="pa-in">
@@ -94,45 +93,52 @@ export function about() {
 </section>
 <section class="wrap grid statement">
   <p class="eyebrow st-eb">(Who we are)</p>
-  <div class="st-body"><p class="focus" data-focus>Flint is an independent brand and marketing company founded in 2026 in west-central Indiana. We work with businesses across seven counties, from Lafayette to Greencastle, and we bring strategy, design, campaigns, media, social and websites under one roof. We believe the best marketing is the kind people choose to pay attention to, and that a local business deserves work as considered as any national brand.</p></div>
+  <div class="st-body"><p class="focus" data-focus>Flint is an independent brand and marketing company founded in 2026 in Indiana. We work with businesses across Indiana and the surrounding states, Illinois, Michigan, Kentucky, Tennessee and Ohio, and we bring strategy, design, campaigns, media, social and websites under one roof. We believe the best marketing is the kind people choose to pay attention to, and that a local business deserves work as considered as any national brand.</p></div>
 </section>
 <section class="wrap principles" aria-labelledby="pr-h">
   <div class="sec-head"><h2 id="pr-h" class="h-l" data-split>What we believe</h2></div>
   <ol class="pr">${[['Say one thing.', 'The brands people remember are the ones that edited hardest.'], ['Earn attention.', 'If people would skip it, we have not finished yet.'], ['Measure honestly.', 'We agree objectives up front and tell you plainly how we did.'], ['Stay close.', 'Small senior teams, a named lead and a reply within one business day.']].map((p, i) => `<li data-reveal><span class="mono">0${i + 1}</span><h3>${p[0]}</h3><p>${p[1]}</p></li>`).join('')}</ol>
 </section>
 <section class="wrap offices area" aria-labelledby="of-h">
-  <div class="sec-head"><h2 id="of-h" class="h-l" data-split>Where we work</h2><p class="mono sec-meta">Seven counties · Indiana · <span data-clock="${TZ}">—:—</span> local time</p></div>
+  <div class="sec-head"><h2 id="of-h" class="h-l" data-split>Where we work</h2><p class="mono sec-meta">${stateOrder.join(' · ')}</p></div>
   <div class="area-grid">
     <figure class="area-map" data-reveal>
-      <div class="am" style="--c:${cols};--r:${rows}" role="img" aria-label="Schematic map of the seven Indiana counties Flint serves: ${areas.map(a => a.county).join(', ')}">
-        ${areas.map(a => `<span class="am-t" style="grid-column:${a.grid[0]};grid-row:${a.grid[1]}"><b>${a.county}</b><span class="mono">${a.seat}</span></span>`).join('')}
+      <div class="am am-states" style="--c:3;--r:4" role="img" aria-label="Schematic map of the states Flint serves: ${regionLong}">
+        ${states.map(a => `<span class="am-t${a.home ? ' am-home' : ''}" style="grid-column:${a.grid}"><b>${a.name}</b><span class="mono">${a.abbr}${a.home ? ' · Home state' : ''}</span></span>`).join('')}
       </div>
       <figcaption class="mono">Schematic, not to scale. North is up.</figcaption>
     </figure>
-    <ul class="of">${areaOrder.map(c => areas.find(a => a.county === c)).map(a => `<li data-reveal><span class="of-c">${a.county} County</span><span class="mono of-t">Indiana</span><span class="of-a">County seat: ${a.seat}</span></li>`).join('')}</ul>
+    <ul class="of">${stateOrder.map(n => states.find(a => a.name === n)).map(a => `<li data-reveal><span class="of-c">${a.name}</span><span class="mono of-t">${a.abbr}</span><span class="of-a">${a.home ? 'Home state, statewide' : 'Neighboring state'}</span></li>`).join('')}</ul>
   </div>
   <figure class="of-img" data-img-reveal>${img(root, 'studio-2', 'A creative review at Flint')}</figure>
 </section>`;
-  return page({ root, path: 'about/', title: 'About — Flint', desc: 'Flint is an independent brand and marketing company founded in 2026, serving Montgomery, Tippecanoe, Fountain, Boone, Parke, Putnam and Clinton counties in Indiana.', body, cls: 'p-about' });
+  return page({ root, path: 'about/', title: 'About — Flint', desc: `Flint is an independent brand and marketing company founded in 2026, serving businesses across ${regionLong}.`, body, cls: 'p-about' });
 }
 
 export function clientsPage() {
   const root = '../';
+  const sectors = [...new Set(cases.map(c => c.sector))];
   const body = `
 <section class="phero wrap">
-  <p class="eyebrow" data-fade>Clients — ${String(cases.length).padStart(2, '0')}</p>
+  <p class="eyebrow" data-fade>Clients</p>
   <h1 class="h-xxl" data-split="hero">Long <em class="serif-i">partnerships,</em> not projects.</h1>
-  <p class="lead phero-lede" data-fade>A thermal drone pilot in Rockville, a meal-prep kitchen in Crawfordsville, an architect licensed in nine states and a mobile detailer in Trafalgar. These are the businesses we work with so far, and there is room on this wall for yours.</p>
+  <p class="lead phero-lede" data-fade>A thermal drone pilot in Rockville, a meal-prep kitchen in Crawfordsville, an architect licensed in nine states and a mobile detailer in Trafalgar. These are the businesses we work with so far.</p>
 </section>
-<section class="wrap cl-wall">${brandWall(root, true)}</section>`;
+<section class="wrap cl-wall">
+  <div class="chips" role="group" aria-label="Filter by sector" data-sector-filter>
+    <button class="chip on" type="button" data-f="all" aria-pressed="true">All sectors</button>
+    ${sectors.map(k => `<button class="chip" type="button" data-f="${esc(k)}" aria-pressed="false">${k}</button>`).join('')}
+  </div>
+  <ul class="lwall lwall-4">${cases.map((c, i) => `<li class="lw-i" data-sector="${esc(c.sector)}"><a href="${root}work/${c.slug}/" data-cursor="Case"><span class="lg lg-${i % 6}">${c.client}</span><span class="mono lw-s">${c.sector} · Case study ↗</span></a></li>`).join('')}</ul>
+</section>`;
   return page({ root, path: 'clients/', title: 'Clients — Flint', desc: 'The businesses Flint works with: Aerial Hunter, Casa Fresca, Conexus Design and Bertram’s Elite Mobile Detailing.', body, cls: 'p-clients' });
 }
 
 export const articles = {
-  'casa-fresca-website-launch': ['Casa Fresca, Sergio Landaverde’s weekly meal-prep and catering kitchen in Crawfordsville, Indiana, now runs on a custom Shopify theme designed and built by Flint. It is live at <a class="ul" href="https://casafrescameals.com" target="_blank" rel="noopener">casafrescameals.com</a>.', 'Casa Fresca cooks a new menu every week. Customers order by Thursday at 6 PM, the kitchen cooks on Monday and Tuesday, and meals are picked up from the cooler at Ironsmith’s Gym in Crawfordsville or delivered on Tuesday. The kitchen also caters company dinners, work lunches, rehearsal dinners and weddings across central Indiana.', 'q:Most visits have one job: get this week’s meals in before Thursday at 6 PM. The theme is built around that.', 'The home page opens on this week’s menu rather than a banner. Each meal card shows protein, calories and carbs, lets you pick a base such as white rice, brown rice or quinoa, and adds to the cart in one tap. A countdown keeps the Thursday cut-off and the Tuesday ready day in view, and phones get a floating cart with the item count and total.', 'Catering has its own page with recent events and an inquiry form, and a macro calculator and a nutrition quiz help regulars choose. The theme has 38 custom sections, carries over more than 80 meals from the store, uses two self-hosted typefaces and respects reduced-motion settings.', '<a class="ul" href="../../work/casa-fresca/">Read the Casa Fresca case study →</a>'],
+  'casa-fresca-website-launch': ['Casa Fresca, Sergio Landaverde’s weekly meal-prep and catering kitchen in Crawfordsville, Indiana, has a new website, designed and built by Flint. It is live at <a class="ul" href="https://casafrescameals.com" target="_blank" rel="noopener">casafrescameals.com</a>.', 'Casa Fresca cooks a new menu every week. Customers order by Thursday at 6 PM, the kitchen cooks on Monday and Tuesday, and meals are picked up from the cooler at Ironsmith’s Gym in Crawfordsville or delivered on Tuesday. The kitchen also caters company dinners, work lunches, rehearsal dinners and weddings across central Indiana.', 'q:Most visits have one job: get this week’s meals in before Thursday at 6 PM. The whole site is built around that.', 'The home page opens on this week’s menu rather than a banner. Each meal card shows protein, calories and carbs, lets you pick a base such as white rice, brown rice or quinoa, and adds to the cart in one tap. A countdown keeps the Thursday cut-off and the Tuesday ready day in view, and phones get a floating cart with the item count and total.', 'Catering has its own page with recent events and an inquiry form, and a macro calculator and a nutrition quiz help regulars choose. The site has 38 page sections designed from scratch, more than 80 meals with photos and macros, two self-hosted typefaces and respects reduced-motion settings.', '<a class="ul" href="../../work/casa-fresca/">Read the Casa Fresca case study →</a>'],
   'conexus-design-website-launch': ['Conexus Design, the architecture practice of founder Adam N. Chester, AIA, NCARB, has a new portfolio website designed and built by Flint at <a class="ul" href="https://www.conexusdesign.com/" target="_blank" rel="noopener">conexusdesign.com</a>.', 'Conexus Design offers contract design, virtual reality walk-throughs, 3D illustrations, planning, programming, schematic and detail design, construction documents and construction administration. Its work spans churches, medical clinics and commercial buildings, and the practice is licensed in Arizona, Colorado, Illinois, Indiana, Michigan, Minnesota, Missouri, North Carolina and Ohio.', 'q:Architecture clients buy the portfolio and the person. The site gets out of the way of both.', 'The home page is one full-bleed image and one line: “Spaces that connect, serve, and uplift.” The projects page counts up to twenty projects, shows where they are on a map and filters by medical, religious and commercial, and every project has its own page. Six service pages walk through the work from concept sketches to construction administration and 3D capture, and the about page introduces Adam, his licences and what clients say about working with him.', '<a class="ul" href="../../work/conexus-design/">Read the Conexus Design case study →</a>'],
   'bertrams-website-launch': ['Bertram’s Elite Mobile Detailing, a veteran-owned detailing business run by Corbin Bertram in Trafalgar, Indiana, has a new website designed and built by Flint at <a class="ul" href="https://www.bertramelitemobiledetailing.com/" target="_blank" rel="noopener">bertramelitemobiledetailing.com</a>.', 'Bertram’s offers ceramic coating, paint protection film, window tint, paint correction, interior and exterior detailing, headlight restoration, and boat detailing and marine coatings. It is certified on the coatings it installs and goes to customers anywhere in central Indiana.', 'q:People who care about their paint want proof first and a price second. The site shows the work, then makes the quote easy.', 'The home page leads with a freshly detailed truck in a customer’s driveway and a services grid built from photos of real jobs. Each of the eight services has its own page, a gallery of recent work filters by protection, correction and care, and marine, and a three-step quote covers the vehicle, the service and how to reach Bertram’s. Call or text sits in the header on every page.', '<a class="ul" href="../../work/bertrams/">Read the Bertram’s case study →</a>'],
-  'introducing-flint': ['Flint is an independent brand and marketing company founded in 2026 and based in west-central Indiana. It serves businesses across Montgomery, Tippecanoe, Fountain, Boone, Parke, Putnam and Clinton counties.', 'Flint brings six practices under one roof: brand strategy, identity and design, campaigns, performance media, social and content, and websites built to turn a visitor into a phone call, a booking or an order. Local businesses work with Flint on a monthly membership.', 'q:A business in Crawfordsville or Rockville deserves the same care as any national brand. That is the whole idea.', 'The company also goes by Flint Marketing and Just Use Flint. Its first case studies are the website for Aerial Hunter, a thermal drone search and recovery service based in Rockville, and a custom Shopify theme for Casa Fresca, a meal-prep and catering kitchen in Crawfordsville.'],
+  'introducing-flint': ['Flint is an independent brand and marketing company founded in 2026 and based in Indiana. It serves businesses across Indiana and the surrounding states: Illinois, Michigan, Kentucky, Tennessee and Ohio.', 'Flint brings six practices under one roof: brand strategy, identity and design, campaigns, performance media, social and content, and websites built to turn a visitor into a phone call, a booking or an order. Local businesses work with Flint on a monthly membership.', 'q:A business in Crawfordsville or Rockville deserves the same care as any national brand. That is the whole idea.', 'The company also goes by Flint Marketing and Just Use Flint. Its first case studies are the website for Aerial Hunter, a thermal drone search and recovery service based in Rockville, and a new website for Casa Fresca, a meal-prep and catering kitchen in Crawfordsville.'],
   'aerial-hunter-website-launch': ['Aerial Hunter, a thermal drone search and recovery service based in Rockville, Indiana, now has a website built by Flint at justuseflint.github.io/aerial-hunter.', 'Aerial Hunter is run by an FAA Part 107 certified pilot who flies a DJI Matrice 4T for deer recovery, lost-pet searches, herd counts and land checks anywhere in Indiana.', 'q:Someone who has just lost a blood trail or a dog is standing in a field with a phone. Everything on the site works back from that moment.', 'The ten-page site opens on a thermal view you can sweep with a cursor or a finger, shows one scene in four thermal palettes, maps the whole state from home base in Rockville and keeps tap-to-call and text one thumb away on every page.'],
 };
 
@@ -184,7 +190,7 @@ export function article(n) {
   <div class="wrap art-body">
     ${pr ? `<p class="mono art-rel">For immediate release</p>` : ''}
     ${paras.map((p, k) => p.startsWith('q:') ? `<blockquote class="pull" data-reveal>${p.slice(2).replace(/ — (.+)$/, '<cite class="mono">— $1</cite>')}</blockquote>` : `<p data-reveal>${k === 0 && pr ? `<b class="mono">${city} — ${fmtDate(n.date).toUpperCase()} —</b> ` : ''}${p}</p>`).join('')}
-    ${pr ? `<div class="boiler"><h2 class="mono">About Flint</h2><p>Flint (Flint Marketing) is an independent brand and marketing company founded in 2026 in west-central Indiana. It serves businesses across ${countyList.slice(0, -1).join(', ')} and ${countyList.at(-1)}.</p><h2 class="mono">Media contact</h2><p><a class="ul" href="${root}contact/?service=press">Send a press enquiry →</a></p></div>` : ''}
+    ${pr ? `<div class="boiler"><h2 class="mono">About Flint</h2><p>Flint (Flint Marketing) is an independent brand and marketing company founded in 2026 in Indiana. It serves businesses across ${regionLong}.</p><h2 class="mono">Media contact</h2><p><a class="ul" href="${root}contact/?service=press">Send a press enquiry →</a></p></div>` : ''}
   </div>
 </article>
 <section class="wrap art-rel-list"><p class="eyebrow">More from the newsroom</p><ul class="nl-list" data-hover-list>${related.map(r => `<li><a href="../${r.slug}/" data-img="${root}assets/img/${r.img}.webp" data-cursor="Read"><span class="mono nl-d">${fmtDate(r.date)}</span><span class="mono nl-ty">${r.type}</span><span class="nl-t">${r.title}</span>${arrow}</a></li>`).join('')}</ul></section>`;
@@ -199,7 +205,7 @@ export function contact() {
     <p class="eyebrow">Start a project</p>
     <h1 class="ct-h">Tell us what you’re working on.</h1>
     <ol class="ct-steps mono" data-steps></ol>
-    <div class="ct-help"><p>We reply to every enquiry within one business day.</p><p class="mono">Serving ${areaOrder.join(' · ')} counties, Indiana</p></div>
+    <div class="ct-help"><p>We reply to every enquiry within one business day.</p><p class="mono">Serving Indiana · Illinois · Michigan · Kentucky · Tennessee · Ohio</p></div>
   </aside>
   <div class="ct-main">
     <div class="ct-prog" aria-hidden="true"><span data-prog></span></div>

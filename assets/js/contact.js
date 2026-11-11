@@ -22,14 +22,13 @@
     { id: 'other', t: 'Something else', d: 'Partnerships, speaking, anything else' }
   ];
   var ALL = SERVICES.concat(OTHER);
-  var COUNTIES = ['Montgomery County', 'Tippecanoe County', 'Fountain County', 'Boone County', 'Parke County', 'Putnam County', 'Clinton County', 'Elsewhere in Indiana', 'Outside Indiana'];
+  var STATES = ['Indiana', 'Illinois', 'Michigan', 'Kentucky', 'Tennessee', 'Ohio', 'Other'];
 
   // q = the question shown as the screen heading; l = short label used on the review screen
   var Q = {
     'brand-strategy': [
-      { k: 'stage', q: 'Where is the brand today?', l: 'Situation', type: 'one', req: 1, o: ['New company, no brand yet', 'Established, needs repositioning', 'Merger or portfolio change', 'Needs a new name'] },
-      { k: 'trigger', q: 'What prompted this now?', l: 'Trigger', type: 'area', req: 1, ph: 'A new competitor, flat growth, new leadership, an upcoming launch…' },
-      { k: 'markets', q: 'Where do your customers live?', l: 'Markets', hint: 'Choose all that apply', type: 'many', o: ['West-central Indiana', 'Across Indiana', 'Across the US', 'International'] } ],
+      { k: 'stage', q: 'Where is the brand today?', l: 'Situation', type: 'one', req: 1, o: ['New Company', 'Established', 'Merger', 'Other'] },
+      { k: 'trigger', q: 'Tell us more', l: 'More detail', sub: 'What prompted this now, and what would you like the brand to do?', type: 'area', req: 1, ph: 'A new competitor, flat growth, new leadership, an upcoming launch…' } ],
     'identity-design': [
       { k: 'scope', q: 'What needs designing?', l: 'Scope', hint: 'Choose all that apply', type: 'many', req: 1, o: ['Logo or wordmark', 'Full identity system', 'Packaging', 'Custom typeface', 'Motion identity', 'Guidelines & toolkit', 'Signage'] },
       { k: 'strategy', q: 'Do you have a brand strategy in place?', l: 'Strategy', type: 'one', req: 1, o: ['Yes, signed off', 'Partly', 'No, we need help with that too'] },
@@ -49,7 +48,7 @@
     'digital-product': [
       { k: 'type', q: 'What are you building?', l: 'Product', type: 'one', req: 1, o: ['Marketing website', 'Online store', 'iOS / Android app', 'Service or platform'] },
       { k: 'phase', q: 'Where are you now?', l: 'Stage', type: 'one', req: 1, o: ['Just an idea', 'Redesigning something live', 'Live and growing'] },
-      { k: 'stack', q: 'What runs your site today?', l: 'Current stack', type: 'text', opt: 1, ph: 'e.g. Shopify, Wix, Squarespace, WordPress' } ],
+      { k: 'stack', q: 'What runs your site today?', l: 'Current stack', type: 'text', opt: 1, ph: 'e.g. Wix, Squarespace, WordPress' } ],
     'press': [
       { k: 'outlet', q: 'Which publication or outlet?', l: 'Outlet', type: 'text', req: 1, ph: 'e.g. Journal & Courier' },
       { k: 'deadline', q: 'When is your deadline?', l: 'Deadline', type: 'date', opt: 1 },
@@ -61,7 +60,7 @@
   var BUDGET = [
     { k: 'budget', q: 'What monthly budget do you have in mind?', l: 'Monthly budget', sub: 'Flint works on monthly memberships. A range is fine.', type: 'one', req: 1, o: ['$100–$500/mo', '$500–$1,000/mo', '$1,000–$2,500/mo', '$2,500–$5,000/mo', 'Not sure yet'] },
     { k: 'timing', q: 'When do you want to start?', l: 'Start', type: 'one', req: 1, o: ['As soon as possible', 'In 1–3 months', 'In 3–6 months', 'Just exploring'] },
-    { k: 'where', q: 'Where is your business based?', l: 'Location', type: 'one', o: COUNTIES }
+    { k: 'where', q: 'Where is your business based?', l: 'Location', type: 'one', o: STATES }
   ];
   var ABOUT1 = [
     { k: 'name', l: 'Full name', type: 'text', req: 1, ac: 'name' },
@@ -74,23 +73,30 @@
     { k: 'phone', l: 'Phone (optional)', type: 'tel', ac: 'tel' },
     { k: 'source', l: 'How did you hear about us?', type: 'one', o: ['Recommendation', 'Search', 'Social media', 'Saw our work', 'Event', 'Other'] }
   ];
-  function about1() { var f = ABOUT1.slice(); if (state.service === 'press') f[2] = { k: 'company', l: 'Organisation (optional)', type: 'text', ac: 'organization' }; return f; }
+  function onlyPress() { return state.services.length > 0 && state.services.every(function (s) { return s === 'press'; }); }
+  function about1() { var f = ABOUT1.slice(); if (onlyPress()) f[2] = { k: 'company', l: 'Organisation (optional)', type: 'text', ac: 'organization' }; return f; }
 
   var params = new URLSearchParams(location.search);
-  var state = { service: null, a: {} };
-  var pre = params.get('service'); if (pre && ALL.some(function (s) { return s.id === pre; })) state.service = pre;
+  // services: every service the visitor ticked, in menu order
+  var state = { services: [], a: {} };
+  var pre = params.get('service'); if (pre && ALL.some(function (s) { return s.id === pre; })) state.services = [pre];
   var step = 0;
 
   function isWork(s) { return SERVICES.some(function (x) { return x.id === s; }); }
+  function anyWork() { return !state.services.length || state.services.some(isWork); }
+  // Questions for each ticked service, in order; a question shared by two services (same key) is asked once.
   function flow() {
-    var s = state.service, F = [{ id: 'service', sec: 'Service' }];
-    (Q[s] || [{ k: '_', q: 'Details' }]).forEach(function (f) { F.push({ id: 'q', sec: 'Details', f: f }); });
-    if (!s || isWork(s)) BUDGET.forEach(function (f) { F.push({ id: 'q', sec: 'Budget & timing', f: f }); });
+    var F = [{ id: 'service', sec: 'Services' }], seen = {};
+    if (!state.services.length) F.push({ id: 'q', sec: 'Details', f: { k: '_', q: 'Details' } });
+    state.services.forEach(function (s) { (Q[s] || []).forEach(function (f) { if (seen[f.k]) return; seen[f.k] = 1; F.push({ id: 'q', sec: 'Details', f: f, svc: s }); }); });
+    if (anyWork()) BUDGET.forEach(function (f) { F.push({ id: 'q', sec: 'Budget & timing', f: f }); });
     F.push({ id: 'about1', sec: 'About you' }, { id: 'about2', sec: 'About you' }, { id: 'review', sec: 'Review' });
     return F;
   }
   function sections(F) { var out = []; F.forEach(function (x) { if (out.indexOf(x.sec) < 0) out.push(x.sec); }); return out; }
   function svcName(id) { var s = ALL.filter(function (x) { return x.id === id; })[0]; return s ? s.t : ''; }
+  function svcNames() { return state.services.map(svcName).join(', '); }
+  function fmt(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); }
 
   function control(q, labelled) {
     var v = state.a[q.k], id = 'f-' + q.k, html;
@@ -114,29 +120,29 @@
     var F = flow(), cur = F[step], html = '';
     var head = function (k, h, sub) { return '<p class="eyebrow ct-k">' + k + '</p><h2 class="ct-q" id="ct-q" tabindex="-1">' + h + '</h2>' + (sub ? '<p class="ct-sub">' + sub + '</p>' : ''); };
     if (cur.id === 'service') {
-      var opt = function (s, i, other) { return '<label class="opt' + (other ? ' opt-other' : '') + '"><input type="radio" name="service" value="' + s.id + '"' + (state.service === s.id ? ' checked' : '') + '><span class="mono">' + String(i + 1).padStart(2, '0') + '</span><span class="opt-t">' + s.t + '</span><span class="opt-d">' + s.d + '</span><span class="opt-c" aria-hidden="true"></span></label>'; };
-      html = head('Service', 'What can we help with?', 'Your answer shapes the next few questions, so we only ask what matters.') +
-        '<div class="fld" data-k="service"><div class="opts" role="radiogroup" aria-labelledby="ct-q">' + SERVICES.map(function (s, i) { return opt(s, i); }).join('') + OTHER.map(function (s, i) { return opt(s, i + 6, true); }).join('') + '</div><span class="fld-err" role="alert">Please choose one to continue.</span></div>';
+      var opt = function (s, i, other) { return '<label class="opt' + (other ? ' opt-other' : '') + '"><input type="checkbox" name="service" value="' + s.id + '"' + (state.services.indexOf(s.id) > -1 ? ' checked' : '') + '><span class="mono">' + String(i + 1).padStart(2, '0') + '</span><span class="opt-t">' + s.t + '</span><span class="opt-d">' + s.d + '</span><span class="opt-c" aria-hidden="true"></span></label>'; };
+      html = head('Services', 'What can we help with?', 'Choose all that apply. Your answers shape the next few questions.') +
+        '<div class="fld" data-k="service"><div class="opts opt-multi" role="group" aria-labelledby="ct-q">' + SERVICES.map(function (s, i) { return opt(s, i); }).join('') + OTHER.map(function (s, i) { return opt(s, i + 6, true); }).join('') + '</div><span class="fld-err" role="alert">Choose at least one to continue.</span></div>';
     } else if (cur.id === 'q') {
       var q = cur.f;
-      html = head(cur.sec === 'Details' ? svcName(state.service) : cur.sec, esc(q.q) + (q.opt ? ' <span class="serif-i" style="color:var(--mute);font-weight:400">(optional)</span>' : ''), q.sub || (q.hint ? q.hint + '.' : '')) + single(q);
+      html = head(cur.svc ? svcName(cur.svc) : cur.sec, esc(q.q) + (q.opt ? ' <span class="ct-opt">(optional)</span>' : ''), q.sub || (q.hint ? q.hint + '.' : '')) + single(q);
     } else if (cur.id === 'about1') {
       html = head('About you', 'And finally, about you.') + '<div class="two">' + about1().map(labelled).join('') + '</div>';
     } else if (cur.id === 'about2') {
       html = head('About you', 'A few optional extras.') + '<div class="two two-3">' + ABOUT2.slice(0, 3).map(labelled).join('') + '</div>' + labelled(ABOUT2[3]);
     } else if (cur.id === 'review') {
-      var groups = [];
-      F.forEach(function (s, i) {
-        if (s.id === 'review') return;
-        var label, val;
-        if (s.id === 'service') { label = 'Enquiry'; val = svcName(state.service); }
-        else if (s.id === 'q') { label = s.f.l; val = state.a[s.f.k]; }
-        else { var set = s.id === 'about1' ? about1() : ABOUT2; label = s.id === 'about1' ? 'Contact' : 'Extras'; val = set.map(function (q) { return state.a[q.k]; }).filter(function (x) { return x && (!Array.isArray(x) || x.length); }).map(function (x) { return Array.isArray(x) ? x.join(', ') : x; }).join(' · '); }
-        if (Array.isArray(val)) val = val.join(', ');
-        if (!val && s.id !== 'service' && s.id !== 'about1') return;
-        groups.push('<div class="rev-g"><div class="rev-h"><span class="eyebrow">' + esc(label) + '</span><button type="button" data-edit="' + i + '">Edit</button></div><p class="rev-v' + (s.id === 'about1' ? ' rev-wide' : '') + '" title="' + esc(val || '') + '">' + esc(val || '—') + '</p></div>');
-      });
-      html = head('Review', 'Does this look right?', 'Check your answers, then send.') + '<div class="rev">' + groups.join('') + '</div>';
+      // One calm row per part of the flow: label, value, a quiet Edit link back to that part.
+      var rows = [], at = function (pred) { for (var i = 0; i < F.length; i++) if (pred(F[i])) return i; return 0; };
+      var join = function (qs) { return qs.map(function (q) { return fmt(state.a[q.k]); }).filter(Boolean).join(' · '); };
+      rows.push(['Services', svcNames(), 0]);
+      state.services.forEach(function (sv) { var qs = F.filter(function (x) { return x.svc === sv; }).map(function (x) { return x.f; }); if (qs.length) rows.push([svcName(sv), join(qs), at(function (x) { return x.svc === sv; })]); });
+      var bq = F.filter(function (x) { return x.sec === 'Budget & timing'; }).map(function (x) { return x.f; });
+      if (bq.length) rows.push(['Budget & timing', join(bq), at(function (x) { return x.sec === 'Budget & timing'; })]);
+      rows.push(['Contact', join(about1()), at(function (x) { return x.id === 'about1'; })]);
+      var ex = join(ABOUT2); if (ex) rows.push(['Extras', ex, at(function (x) { return x.id === 'about2'; })]);
+      html = head('Review', 'Does this look right?', 'Check your answers, then send.') + '<dl class="rv">' + rows.map(function (r) {
+        return '<div class="rv-r"><dt>' + esc(r[0]) + '</dt><dd title="' + esc(r[1] || '') + '">' + esc(r[1] || '—') + '</dd><button type="button" class="rv-e" data-edit="' + r[2] + '" aria-label="Edit ' + esc(r[0]) + '">Edit</button></div>';
+      }).join('') + '</dl>';
     }
     var swap = function () {
       stage.innerHTML = '<div class="ct-step">' + html + '</div>';
@@ -147,7 +153,11 @@
       var secs = sections(F), curSec = secs.indexOf(cur.sec);
       stepsEl.innerHTML = secs.map(function (s, i) { return '<li class="' + (i === curSec ? 'on' : i < curSec ? 'done' : '') + '"><span>0' + (i + 1) + ' ' + s + '</span><span>' + (i < curSec ? 'Done' : i === curSec ? '●' : '') + '</span></li>'; }).join('');
       stage.querySelectorAll('[data-edit]').forEach(function (b) { b.addEventListener('click', function () { go(+b.dataset.edit); }); });
-      stage.querySelectorAll('input[name=service]').forEach(function (r) { r.addEventListener('change', function () { var old = state.service; state.service = r.value; if (old !== r.value) { Object.keys(state.a).forEach(function (k) { if (!/^(name|email|company|website|title|phone|source|budget|timing|where)$/.test(k)) delete state.a[k]; }); } setTimeout(function () { go(1); }, 280); }); });
+      stage.querySelectorAll('input[name=service]').forEach(function (r) { r.addEventListener('change', function () {
+        state.services = ALL.map(function (x) { return x.id; }).filter(function (id) { var i = stage.querySelector('input[name=service][value="' + id + '"]'); return i && i.checked; });
+        var keep = {}; state.services.forEach(function (sv) { (Q[sv] || []).forEach(function (f) { keep[f.k] = 1; }); });
+        Object.keys(state.a).forEach(function (k) { if (!keep[k] && !/^(name|email|company|website|title|phone|source|budget|timing|where)$/.test(k)) delete state.a[k]; });
+      }); });
       // single-choice questions advance on their own
       if (cur.id === 'q' && cur.f.type === 'one') stage.querySelectorAll('input[type=radio]').forEach(function (r) { r.addEventListener('change', function () { collect(); setTimeout(function () { if (flow()[step] === cur || flow()[step].f === cur.f) go(step + 1); }, 320); }); });
       fit();
@@ -180,7 +190,7 @@
   function validate() {
     var F = flow(), cur = F[step], ok = true, firstBad = null;
     var set = cur.id === 'q' ? [cur.f] : cur.id === 'about1' ? about1() : cur.id === 'about2' ? ABOUT2 : [];
-    if (cur.id === 'service') { var f = stage.querySelector('[data-k=service]'); var bad = !state.service; f.classList.toggle('err', bad); if (bad) return false; }
+    if (cur.id === 'service') { var f = stage.querySelector('[data-k=service]'); var bad = !state.services.length; f.classList.toggle('err', bad); if (bad) return false; }
     set.forEach(function (q) {
       var v = state.a[q.k], bad = false;
       if (q.req && (!v || (Array.isArray(v) && !v.length))) bad = true;
@@ -211,10 +221,10 @@
   });
 
   function payloadFor(ref) {
-    var F = flow(), rows = [['Inquiry type', svcName(state.service)]], seen = {};
+    var F = flow(), multi = state.services.length > 1, rows = [['Services', svcNames()]], seen = {};
     F.forEach(function (st) {
       var set = st.id === 'q' ? [st.f] : st.id === 'about1' ? about1() : st.id === 'about2' ? ABOUT2 : [];
-      set.forEach(function (q) { if (seen[q.k]) return; seen[q.k] = 1; var v = state.a[q.k]; v = Array.isArray(v) ? v.join(', ') : (v || ''); rows.push([q.l.replace(/ \(optional\)$/, ''), v || '—']); });
+      set.forEach(function (q) { if (seen[q.k] || q.k === '_') return; seen[q.k] = 1; var v = fmt(state.a[q.k]); rows.push([(multi && st.svc ? svcName(st.svc) + ': ' : '') + q.l.replace(/ \(optional\)$/, ''), v || '—']); });
     });
     rows.push(['Reference', ref], ['Sent from', location.href.split('?')[0]]);
     return rows;
@@ -223,9 +233,9 @@
     var ref = 'FL-26-' + String(Math.floor(1000 + Math.random() * 9000));
     var hp = form.querySelector('[data-hp]');
     if (hp && hp.value) return done(ref); // bots fill the hidden field; pretend it worked
-    if (!ENDPOINT && !W3F) return success(ref);
+    if (!ENDPOINT && !W3F) return done(ref);
     var rows = payloadFor(ref), name = state.a.name || 'someone';
-    var subject = 'New Flint inquiry: ' + svcName(state.service) + ' from ' + name;
+    var subject = 'New Flint inquiry: ' + svcNames() + ' from ' + name;
     var body = {};
     rows.forEach(function (r) { body[r[0]] = r[1]; });
     var url = ENDPOINT;
@@ -235,7 +245,7 @@
     var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.success === false || j.success === 'false') throw new Error(j.message || ('HTTP ' + r.status)); return j; }); })
-      .then(function () { clearTimeout(to); success(ref); })
+      .then(function () { clearTimeout(to); done(ref); })
       .catch(function (e) {
         clearTimeout(to); next.disabled = false; back.disabled = false; next.querySelector('span').textContent = 'Try again';
         if (errEl) errEl.hidden = false;
@@ -243,86 +253,16 @@
       });
   }
 
-  /* ---------- Success transition: a distortion wave ----------
-     Plays only after the endpoint confirms the send. A ring of light radiates from the Send button; as it passes,
-     the page bends (SVG displacement), splits into red/green/blue fringes and blurs inside the band. When the wave
-     has crossed most of the screen the success screen is swapped in underneath, and the ring runs out to the edges. */
-  function success(ref) {
-    if (RM || !window.requestAnimationFrame) return done(ref);
-    var b = next.getBoundingClientRect(), ox = b.left + b.width / 2, oy = b.top + b.height / 2;
-    var vw = innerWidth, vh = innerHeight;
-    var maxR = Math.max(Math.hypot(ox, oy), Math.hypot(vw - ox, oy), Math.hypot(ox, vh - oy), Math.hypot(vw - ox, vh - oy));
-    var W = Math.max(110, Math.min(vw, vh) * 0.26), DUR = 1500, swapped = false;
-    var NS = 'http://www.w3.org/2000/svg';
-    var svg = d.createElementNS(NS, 'svg'); svg.setAttribute('class', 'fw-defs'); svg.setAttribute('aria-hidden', 'true');
-    svg.innerHTML = '<filter id="fw-f" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">' +
-      '<feTurbulence type="fractalNoise" baseFrequency="0.006 0.018" numOctaves="2" seed="7" result="n"/>' +
-      '<feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
-      '<feColorMatrix in="d" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="r"/><feOffset in="r" dx="0" dy="0" result="ro"/>' +
-      '<feColorMatrix in="d" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="g"/>' +
-      '<feColorMatrix in="d" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="b"/><feOffset in="b" dx="0" dy="0" result="bo"/>' +
-      '<feBlend in="ro" in2="g" mode="screen" result="rg"/><feBlend in="rg" in2="bo" mode="screen"/></filter>';
-    d.body.appendChild(svg);
-    var disp = svg.querySelector('feDisplacementMap'), offs = svg.querySelectorAll('feOffset');
-    var band = d.createElement('div'); band.className = 'fw-band'; band.setAttribute('aria-hidden', 'true'); d.body.appendChild(band);
-    var cv = d.createElement('canvas'); cv.className = 'fw-cv'; cv.setAttribute('aria-hidden', 'true'); d.body.appendChild(cv);
-    var dpr = Math.min(devicePixelRatio || 1, 2); cv.width = vw * dpr; cv.height = vh * dpr;
-    var gl = null, prog = null, U = {};
-    try { gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true }); } catch (e) {}
-    if (gl) {
-      var sh = function (t, src) { var o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; };
-      prog = gl.createProgram();
-      gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));
-      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float;uniform vec2 O;uniform float R,Wd,A,T,S;' +
-        'float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}' +
-        'void main(){vec2 q=gl_FragCoord.xy/S;vec2 v=q-O;float dd=length(v);float x=(dd-R)/Wd;' +
-        'float body=exp(-x*x*5.);float lead=exp(-pow((x-.42)/.07,2.));float tail=exp(-pow((x+.55)/.12,2.))*.5;' +
-        'float an=atan(v.y,v.x);vec3 c=.55+.45*cos(6.2832*(fract(an/6.2832+dd*.0012-T*.35)+vec3(0.,.33,.67)));' +
-        'float sp=step(.9965,h(floor(q/2.)+floor(T*24.)))*body;' +
-        'float a=clamp((body*.22+lead*.75+tail+sp)*A,0.,1.);gl_FragColor=vec4(mix(c,vec3(1.),lead*.35+sp)*a,a);}'));
-      gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) gl = null;
-      else {
-        gl.useProgram(prog);
-        var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-        var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-        ['O', 'R', 'Wd', 'A', 'T', 'S'].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k); });
-        gl.uniform2f(U.O, ox, vh - oy); gl.uniform1f(U.Wd, W); gl.uniform1f(U.S, dpr);
-        gl.viewport(0, 0, cv.width, cv.height);
-      }
-    }
-    root.classList.add('fw-on'); H.classList.add('fw-run');
-    var t0 = performance.now();
-    var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
-    (function frame(now) {
-      var t = Math.min(1, (now - t0) / DUR), r = ease(t) * (maxR + W * 1.2);
-      var k = Math.sin(Math.PI * Math.min(1, t * 1.15)); // distortion strength: up, then back to rest
-      disp.setAttribute('scale', (k * 16).toFixed(2));
-      offs[0].setAttribute('dx', (k * 4).toFixed(2)); offs[1].setAttribute('dx', (-k * 4).toFixed(2));
-      offs[0].setAttribute('dy', (k * 1.5).toFixed(2)); offs[1].setAttribute('dy', (-k * 1.5).toFixed(2));
-      var m = 'radial-gradient(circle at ' + ox + 'px ' + oy + 'px, transparent ' + Math.max(0, r - W * 0.9) + 'px, #000 ' + Math.max(0, r - W * 0.15) + 'px, #000 ' + (r + W * 0.2) + 'px, transparent ' + (r + W * 0.5) + 'px)';
-      band.style.webkitMaskImage = m; band.style.maskImage = m; band.style.opacity = String(1 - Math.max(0, t - 0.8) / 0.2);
-      if (gl) {
-        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.uniform1f(U.R, r); gl.uniform1f(U.T, (now - t0) / 1000); gl.uniform1f(U.A, Math.min(1, t * 6) * (1 - Math.max(0, t - 0.78) / 0.22));
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      }
-      if (!swapped && r > maxR * 0.5) { swapped = true; done(ref, true); }
-      if (t < 1) requestAnimationFrame(frame);
-      else { root.classList.remove('fw-on'); H.classList.remove('fw-run'); svg.remove(); band.remove(); cv.remove(); if (!swapped) done(ref, true); }
-    })(t0);
-  }
-  function done(ref, waved) {
+  function done(ref) {
     var first = (state.a.name || '').split(' ')[0] || 'there';
     if (errEl) errEl.hidden = true;
-    var s = state.service, steps;
-    if (s === 'press') steps = [['Within 1 day', 'We reply with availability and anything you asked for.']];
-    else if (s === 'other') steps = [['Within 1 day', 'The right person at Flint replies to you directly.']];
+    var work = state.services.some(isWork), steps;
+    if (!work && onlyPress()) steps = [['Within 1 day', 'We reply with availability and anything you asked for.']];
+    else if (!work) steps = [['Within 1 day', 'The right person at Flint replies to you directly.']];
     else steps = [['Within 1 day', 'We reply personally to set up a first conversation.'], ['Within 1 week', 'A call to understand the business problem.'], ['After the call', 'A written plan with the work, the timing and the monthly fee.']];
     var html = '<div class="ct-step done"><span class="done-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>' +
       '<p class="eyebrow ct-k">Enquiry received</p><h2 class="ct-q" tabindex="-1">Thank you, ' + esc(first) + '.</h2>' +
-      '<p class="ct-sub">' + (s === 'other' || s === 'press' ? 'Your message is with us.' : 'Your ' + esc(svcName(s).toLowerCase()) + ' enquiry is with us.') + '</p>' +
+      '<p class="ct-sub">' + (work ? 'Your enquiry about ' + esc(state.services.filter(isWork).map(svcName).join(', ').toLowerCase()) + ' is with us.' : 'Your message is with us.') + '</p>' +
       '<div class="done-ref mono"><span>Reference <b>' + ref + '</b></span></div>' +
       '<ol class="next-steps">' + steps.map(function (x) { return '<li><span class="mono">' + x[0] + '</span><span>' + x[1] + '</span></li>'; }).join('') + '</ol>' +
       '<div><a class="btn" href="../work/"><span>Explore our work</span></a></div></div>';
@@ -331,10 +271,10 @@
     stepsEl.querySelectorAll('li').forEach(function (li) { li.className = 'done'; li.lastChild.textContent = 'Done'; });
     fit();
     stage.querySelector('.ct-q').focus({ preventScroll: true });
-    if (G && !RM) G.fromTo(stage.querySelectorAll('.done > *'), { opacity: 0, y: waved ? 14 : 24, scale: waved ? 0.985 : 1 }, { opacity: 1, y: 0, scale: 1, duration: waved ? 1.1 : 0.9, ease: 'expo.out', stagger: waved ? 0.05 : 0.07 });
+    if (G && !RM) G.fromTo(stage.querySelectorAll('.done > *'), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.07 });
   }
 
-  if (state.service && params.get('service')) step = 1;
+  if (state.services.length && params.get('service')) step = 1;
   render(0);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 })();

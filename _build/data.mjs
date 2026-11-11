@@ -1,19 +1,20 @@
 export const TZ = 'America/Indiana/Indianapolis';
-// Indiana service area (all seven counties are on Eastern time). Grid = schematic position for the area map.
-export const areas = [
-  { county: 'Tippecanoe', seat: 'Lafayette', grid: [2, 1] },
-  { county: 'Clinton', seat: 'Frankfort', grid: [3, 1] },
-  { county: 'Fountain', seat: 'Covington', grid: [1, 2] },
-  { county: 'Montgomery', seat: 'Crawfordsville', grid: [2, 2] },
-  { county: 'Boone', seat: 'Lebanon', grid: [3, 2] },
-  { county: 'Parke', seat: 'Rockville', grid: [1, 3] },
-  { county: 'Putnam', seat: 'Greencastle', grid: [2, 3] },
+// Service area: Indiana and the five states around it. Grid = position on the schematic tile map (about page).
+export const states = [
+  { name: 'Michigan', abbr: 'MI', grid: '2 / span 2;grid-row:1' },
+  { name: 'Illinois', abbr: 'IL', grid: '1;grid-row:2 / span 2' },
+  { name: 'Indiana', abbr: 'IN', home: true, grid: '2;grid-row:2' },
+  { name: 'Ohio', abbr: 'OH', grid: '3;grid-row:2' },
+  { name: 'Kentucky', abbr: 'KY', grid: '2 / span 2;grid-row:3' },
+  { name: 'Tennessee', abbr: 'TN', grid: '1 / span 3;grid-row:4' },
 ];
-export const areaOrder = ['Montgomery', 'Tippecanoe', 'Fountain', 'Boone', 'Parke', 'Putnam', 'Clinton'];
+export const stateOrder = ['Indiana', 'Illinois', 'Michigan', 'Kentucky', 'Tennessee', 'Ohio'];
+export const region = 'Indiana and the surrounding states';
+export const regionLong = 'Indiana, Illinois, Michigan, Kentucky, Tennessee and Ohio';
 
 export const stats = [
   { v: 2026, label: 'The year Flint was founded', suffix: '', plain: true },
-  { v: 7, label: 'Indiana counties we serve', suffix: '' },
+  { v: 6, label: 'States we serve: Indiana and its neighbors', suffix: '' },
   { v: 6, label: 'Practices under one roof', suffix: '' },
   { v: 1, label: 'Business day to reply to every enquiry', suffix: '' },
 ];
@@ -61,12 +62,12 @@ export const services = [
     faq: [['Do you take the photos and videos?', 'We plan and make them with you, using what you already have where it is good enough.'], ['Who writes the posts?', 'We do, from a monthly plan you approve, with a named lead you can message directly.'], ['Do you do community management?', 'Yes, if you want it, with replies planned around the hours your customers are actually online.']] },
   { slug: 'digital-product', name: 'Digital Product', short: 'Digital', n: '06',
     lede: 'Websites and online stores designed and built to turn visitors into calls and orders, and to last.',
-    body: 'From a ten-page service site to a Shopify store, we design and build websites where the brand and the buttons work together. Every site ships with analytics, an accessibility check and a plan for what happens next.',
+    body: 'From a ten-page service site to an online store, we design and build websites where the brand and the buttons work together. Every site ships with analytics, an accessibility check and a plan for what happens next.',
     caps: ['Product strategy', 'UX research', 'UI & interaction design', 'Web & app engineering', 'E-commerce', 'Accessibility', 'CMS & headless builds', 'Conversion optimisation'],
     steps: [['Discover', 'What your customers need to find, and what you need them to do: call, book or order.'], ['Design', 'Real pages with your real words and photos, reviewed with you early.'], ['Build', 'Fast, accessible pages, tested on phones first.'], ['Grow', 'Monthly updates and improvements as part of your membership.']],
     stat: ['AA', 'WCAG 2.2 accessibility check on everything we ship'],
     work: ['aerial-hunter', 'casa-fresca', 'conexus-design', 'bertrams'],
-    faq: [['Which technologies do you build with?', 'Plain, fast HTML, CSS and JavaScript for simple sites, as with Aerial Hunter; Next.js for larger ones, as with Conexus Design and Bertram’s; and Shopify for online stores, as with Casa Fresca.'], ['Do you offer support after launch?', 'Yes. Hosting help, updates and changes are part of the monthly membership.'], ['Is accessibility included?', 'Always. Everything we ship is checked against WCAG 2.2 AA before launch.']] },
+    faq: [['Which technologies do you build with?', 'Plain, fast HTML, CSS and JavaScript for simple sites, as with Aerial Hunter; and Next.js for larger sites, as with Conexus Design and Bertram’s. For online ordering we pick the platform that suits the business, as with Casa Fresca’s weekly menu.'], ['Do you offer support after launch?', 'Yes. Hosting help, updates and changes are part of the monthly membership.'], ['Is accessibility included?', 'Always. Everything we ship is checked against WCAG 2.2 AA before launch.']] },
 ];
 
 export const cases = [
@@ -84,20 +85,20 @@ export const cases = [
     phones: [['aerial-hunter-2', 'Tap to call, on a phone'], ['aerial-hunter-area-m', 'Service area, on a phone']],
     stack: ['Plain HTML, CSS and JavaScript', 'GSAP + ScrollTrigger motion', 'Respects reduced-motion settings', 'Built from the business’s own photos and logo'],
     links: [['Visit the live site', 'https://justuseflint.github.io/aerial-hunter/']] },
-  { slug: 'casa-fresca', client: 'Casa Fresca', title: 'Cooked fresh, ready Tuesday.', year: 2026, sector: 'Meal Prep & Catering', town: 'Crawfordsville, Indiana', disc: ['Shopify theme', 'E-commerce', 'Web design'], svc: ['digital-product'], markets: 'Crawfordsville, Indiana', site: 'https://casafrescameals.com', siteLabel: 'casafrescameals.com',
+  { slug: 'casa-fresca', client: 'Casa Fresca', title: 'Cooked fresh, ready Tuesday.', year: 2026, sector: 'Meal Prep & Catering', town: 'Crawfordsville, Indiana', disc: ['Website', 'Online ordering', 'Web design'], svc: ['digital-product'], markets: 'Crawfordsville, Indiana', site: 'https://casafrescameals.com', siteLabel: 'casafrescameals.com',
     theme: { bg: '#FBF4E6', fg: '#2B1B18', accent: '#E5492F', muted: '#A35F35', dark: false, font: 'Bricolage Grotesque', fam: 'Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800', weight: 700, track: '-0.03em', stretch: '84%' },
-    lede: 'A custom Shopify theme for Casa Fresca, Sergio Landaverde’s weekly meal-prep and catering kitchen in Crawfordsville, Indiana. This week’s menu comes first, and every meal is one tap from the cart.',
-    brief: 'Casa Fresca cooks a new menu every week. Customers order by Thursday at 6 PM, the kitchen cooks on Monday and Tuesday, and meals are picked up from the cooler at Ironsmith’s Gym in Crawfordsville or delivered on Tuesday. The kitchen also caters company dinners, work lunches, rehearsal dinners and weddings across central Indiana. The job was a Shopify theme that makes the weekly order quick on a phone and keeps the cut-off impossible to miss.',
+    lede: 'A complete website for Casa Fresca, Sergio Landaverde’s weekly meal-prep and catering kitchen in Crawfordsville, Indiana. This week’s menu comes first, and every meal is one tap from the cart.',
+    brief: 'Casa Fresca cooks a new menu every week. Customers order by Thursday at 6 PM, the kitchen cooks on Monday and Tuesday, and meals are picked up from the cooler at Ironsmith’s Gym in Crawfordsville or delivered on Tuesday. The kitchen also caters company dinners, work lunches, rehearsal dinners and weddings across central Indiana. The job was a website, designed from scratch, that makes the weekly order quick on a phone and keeps the cut-off impossible to miss.',
     zoom: 'Tuesday.', insightH: 'Most visits have one job: get this week’s meals in before Thursday at 6 PM.',
     insight: 'So the home page opens on this week’s menu, not a banner. The cut-off and the ready day sit beside the headline with a live countdown, sides and bases are picked right on the meal card, and the cart is one tap away on every page.',
     chapters: [['The menu', 'This week’s meals lead the home page. Each card shows protein, calories and carbs, lets you choose a base such as white rice, brown rice or quinoa, and adds to the cart in one tap.'], ['The week', 'An announcement bar and a date card count down to the Thursday 6 PM cut-off and show the Tuesday ready day. How it works lays the week out in four steps, with pickup at Ironsmith’s Gym and Tuesday delivery side by side.'], ['The extras', 'Catering has its own page with recent events and an inquiry form. A macro calculator and a nutrition quiz help regulars choose, and phones get a floating cart with the item count and total.']],
     plates: ['casa-fresca-plate-menu', 'casa-fresca-plate-week', 'casa-fresca-plate-extras'],
-    built: [{ v: 38, label: 'Custom theme sections' }, { v: 80, suffix: '+', label: 'Meals carried over from the store' }, { v: 2, label: 'Self-hosted typefaces' }, { v: 1, label: 'Tap to add a meal to the cart' }],
-    galleryH: 'Screens from the theme.', galleryNote: 'Captured from the theme preview, which runs on Casa Fresca’s real menu, photos and prices.',
+    built: [{ v: 38, label: 'Page sections, designed from scratch' }, { v: 80, suffix: '+', label: 'Meals on the menu, with photos and macros' }, { v: 2, label: 'Self-hosted typefaces' }, { v: 1, label: 'Tap to add a meal to the cart' }],
+    galleryH: 'Screens from the site.', galleryNote: 'Captured from the site, which runs on Casa Fresca’s real menu, photos and prices.',
     gallery: [['casa-fresca-product', 'Meal page: photos, sides and nutrition'], ['casa-fresca-catering', 'Catering: events and an inquiry form'], ['casa-fresca-events', 'Catering: recent events'], ['casa-fresca-macro', 'Macro calculator']],
     phones: [['casa-fresca-2', 'This week’s menu, on a phone'], ['casa-fresca-cart-m', 'Floating cart, on a phone']],
-    stack: ['Shopify Online Store 2.0, JSON templates', 'Vanilla JavaScript, no dependencies', 'Bricolage Grotesque and Instrument Serif, self-hosted', 'Respects reduced-motion settings; theme check passes'],
-    links: [['Visit casafrescameals.com', 'https://casafrescameals.com'], ['See the theme preview', 'https://justuseflint.github.io/casa-fresca-theme-preview/']] },
+    stack: ['Custom design, built page by page', 'Vanilla JavaScript, no dependencies', 'Bricolage Grotesque and Instrument Serif, self-hosted', 'Respects reduced-motion settings'],
+    links: [['Visit casafrescameals.com', 'https://casafrescameals.com']] },
   { slug: 'conexus-design', client: 'Conexus Design', title: 'Spaces that connect, serve and uplift.', year: 2026, sector: 'Architecture', town: 'Licensed in nine states', disc: ['Website', 'Portfolio', 'Motion'], svc: ['digital-product'], markets: 'Licensed in Arizona, Colorado, Illinois, Indiana, Michigan, Minnesota, Missouri, North Carolina and Ohio', site: 'https://www.conexusdesign.com/', siteLabel: 'conexusdesign.com',
     theme: { bg: '#0F0F0F', fg: '#FFFFFF', accent: '#C8A27A', muted: '#9A948C', dark: true, font: 'Figtree', fam: 'Figtree:wght@300..700', weight: 300, track: '-0.045em', stretch: '100%' },
     lede: 'A portfolio website for Conexus Design, the architecture practice of Adam N. Chester, AIA, NCARB. Twenty church, medical and commercial projects, six services and nine licensed states, presented as calmly as the buildings themselves.',
@@ -133,8 +134,8 @@ export const clients = cases.map(c => c.client);
 export const news = [
   { slug: 'bertrams-website-launch', type: 'News', date: '2026-11-10', title: 'Bertram’s Elite Mobile Detailing has a new website', dek: 'Eight services, a gallery of real jobs and a three-step quote for a veteran-owned detailer in Trafalgar, Indiana.', img: 'bertrams-hero', read: 2 },
   { slug: 'conexus-design-website-launch', type: 'News', date: '2026-11-10', title: 'A new portfolio website for Conexus Design', dek: 'Twenty projects, six services and nine licensed states for the architecture practice of Adam N. Chester, AIA, NCARB.', img: 'conexus-design-hero', read: 2 },
-  { slug: 'casa-fresca-website-launch', type: 'News', date: '2026-11-10', title: 'Casa Fresca’s new Shopify theme is live', dek: 'A custom theme for a weekly meal-prep and catering kitchen in Crawfordsville, built so this week’s menu comes first and the Thursday cut-off is impossible to miss.', img: 'casa-fresca-hero', read: 2 },
-  { slug: 'introducing-flint', type: 'Press release', date: '2026-11-09', title: 'Introducing Flint, an independent marketing company for west-central Indiana', dek: 'Founded in 2026, Flint brings strategy, design, campaigns, media, social and websites to local businesses on a simple monthly membership.', img: 'studio', read: 2 },
+  { slug: 'casa-fresca-website-launch', type: 'News', date: '2026-11-10', title: 'Casa Fresca has a new website', dek: 'A complete website for a weekly meal-prep and catering kitchen in Crawfordsville, built so this week’s menu comes first and the Thursday cut-off is impossible to miss.', img: 'casa-fresca-hero', read: 2 },
+  { slug: 'introducing-flint', type: 'Press release', date: '2026-11-09', title: 'Introducing Flint, an independent marketing company for Indiana and the surrounding states', dek: 'Founded in 2026, Flint brings strategy, design, campaigns, media, social and websites to local businesses on a simple monthly membership.', img: 'studio', read: 2 },
   { slug: 'aerial-hunter-website-launch', type: 'News', date: '2026-11-09', title: 'Aerial Hunter’s new website is live', dek: 'A ten-page site for a thermal drone pilot who searches all of Indiana, built to get a caller from search to phone in seconds.', img: 'aerial-hunter-hero', read: 2 },
 ];
 

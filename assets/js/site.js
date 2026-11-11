@@ -65,7 +65,7 @@
   var islOpen = false, islTl = null, lastFocus = null, scrim = null, closedW = 300;
   function islSize() {
     var mob = innerWidth < 768, vh = (W.visualViewport ? W.visualViewport.height : innerHeight);
-    if (mob) { var w = Math.min(340, innerWidth - 24); return { w: w, h: Math.min(Math.round(w * 1.36), vh - 32) }; }
+    if (mob) { var w = Math.min(340, innerWidth - 24); return { w: w, h: Math.min(304, vh - 32) }; }
     return { w: 468, h: Math.min(312, vh - 56) };
   }
   function setShown() {
@@ -137,7 +137,7 @@
       var target = imgs.filter(function (im) { return im.dataset.islImg === key; })[0] || imgs[0];
       imgs.forEach(function (im) { im.classList.toggle('on', im === target); });
       if (idx) idx.textContent = n ? n : 'Flint';
-      if (txt) txt.textContent = caps[key] || 'Brand & marketing, west-central Indiana';
+      if (txt) txt.textContent = caps[key] || 'Brand & marketing for Indiana and nearby states';
     };
     links().forEach(function (a) {
       var on = function () { slab(a.dataset.islKey, a.querySelector('.mono') ? a.querySelector('.mono').textContent : ''); };

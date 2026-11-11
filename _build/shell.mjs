@@ -1,4 +1,4 @@
-import { areas, areaOrder, TZ, services, cases, news } from './data.mjs';
+import { states, stateOrder, region, regionLong, services, cases, news } from './data.mjs';
 export const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 import { readFileSync } from 'node:fs';
 const MAN = JSON.parse(readFileSync(new URL('./img.json', import.meta.url), 'utf8'));
@@ -13,11 +13,11 @@ export const img = (root, n, alt = '', cls = '', extra = '') => {
 export const arrow = `<svg class="arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`;
 // Wordmark: "Flint" with the accent square riding on the dotless i
 export const logo = (big = false) => `<span class="wm${big ? ' wm-big' : ''}" aria-label="Flint"><span aria-hidden="true">Fl</span><span class="wm-i" aria-hidden="true">ı<i></i></span><span aria-hidden="true">nt</span></span>`;
-export const countyList = areaOrder.map(c => `${c} County`);
+export const stateList = stateOrder;
 
 const NAV = [['Work', 'work/', cases.length], ['Services', 'services/', services.length], ['About', 'about/'], ['Clients', 'clients/'], ['News', 'news/']];
 // Island preview slab: one image + line per destination
-const SLAB = { 'work/': ['aerial-hunter-hero', 'Four sites shipped in 2026'], 'services/': ['casa-fresca-how', 'Six practices, one team'], 'about/': ['studio', 'Founded 2026 in west-central Indiana'], 'clients/': ['bertrams-hero', 'Aerial Hunter, Casa Fresca, Conexus, Bertram’s'], 'news/': ['conexus-design-hero', 'Launches and news'], 'contact/': ['hero-pill', 'Start a project with us'] };
+const SLAB = { 'work/': ['aerial-hunter-hero', 'Four sites shipped in 2026'], 'services/': ['casa-fresca-how', 'Six practices, one team'], 'about/': ['studio', 'Founded 2026 in Indiana'], 'clients/': ['bertrams-hero', 'Aerial Hunter, Casa Fresca, Conexus, Bertram’s'], 'news/': ['conexus-design-hero', 'Launches and news'], 'contact/': ['hero-pill', 'Start a project with us'] };
 
 // Accordion menu (opened from the header's dot-grid button): four rows, one opens at a time to show its links over an image.
 const dots = `<span class="dots" aria-hidden="true">${Array.from({ length: 9 }, (_, k) => `<i class="d${k}"></i>`).join('')}</span>`;
@@ -28,7 +28,7 @@ function accMenu(root, path) {
     ['Work', 'aerial-hunter-hero', [['Case studies', cases.map(c => L(c.short || c.client, `work/${c.slug}/`))], ['Browse', [L('All work', 'work/'), L('Clients', 'clients/')]]]],
     ['Services', 'studio-2', [['Practices', services.slice(0, 3).map(x => L(x.name, `services/${x.slug}/`))], ['', services.slice(3).map(x => L(x.name, `services/${x.slug}/`))], ['Overview', [L('All services', 'services/')]]]],
     ['Studio', 'studio', [['Flint', [L('About', 'about/'), L('Clients', 'clients/'), L('News', 'news/')]], ['Latest', news.slice(0, 2).map(n => L(n.title, `news/${n.slug}/`))]]],
-    ['Contact', '', [['New project', [L('Start a project', 'contact/'), L('support@justuseflint.com', 'mailto:support@justuseflint.com', true)]], ['Service area', [`<span>Seven counties in west-central Indiana</span>`]]]],
+    ['Contact', '', [['New project', [L('Start a project', 'contact/'), L('support@justuseflint.com', 'mailto:support@justuseflint.com', true)]], ['Service area', [`<span>${region}</span>`]]]],
   ];
   return `<div class="acm" id="acm" data-acm role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true" inert>
   <div class="acm-top"><a class="acm-logo" href="${root}" aria-label="Flint home">${logo()}</a><div class="acm-tr"><a class="btn btn-sm acm-cta" href="${root}contact/"><span>Start a project</span></a><button class="acm-x" type="button" aria-label="Close menu" data-acm-close>${dots}</button></div></div>
@@ -61,7 +61,7 @@ ${accMenu(root, path)}
       <nav class="isl-nav" aria-label="Site menu">${links.map(([t, h], i) => `<a class="isl-link${h === 'contact/' ? ' isl-link-sm' : ''}" href="${root}${h}"${cur(h)} data-isl-key="${h || 'home'}"><span class="mono">0${i + 1}</span>${t}</a>`).join('')}</nav>
       <div class="isl-slab" aria-hidden="true">
         <span class="isl-media">${img(root, 'aerial-hunter-hero', '', 'on', 'data-isl-img="home" sizes="360px"')}${Object.entries(SLAB).map(([k, [n]]) => img(root, n, '', '', `data-isl-img="${k}" sizes="360px"`)).join('')}</span>
-        <span class="isl-cap"><span class="mono" data-isl-idx>Flint</span><span data-isl-txt>Brand &amp; marketing, west-central Indiana</span></span>
+        <span class="isl-cap"><span class="mono" data-isl-idx>Flint</span><span data-isl-txt>Brand &amp; marketing for Indiana and nearby states</span></span>
         <span hidden data-isl-captions='${esc(JSON.stringify(Object.fromEntries(Object.entries(SLAB).map(([k, v]) => [k, v[1]]))))}'></span>
       </div>
     </div>
@@ -93,12 +93,12 @@ export function footer(root) {
     <div class="ftr-grid">
       <div class="ftr-col ftr-news">
         <p class="eyebrow">Flint Marketing</p>
-        <p class="ftr-copy">An independent brand and marketing company, founded in 2026 and based in west-central Indiana.</p>
+        <p class="ftr-copy">An independent brand and marketing company, founded in 2026 in Indiana and serving Indiana and the surrounding states.</p>
         <a class="btn btn-sm ftr-btn" href="${root}contact/"><span>Start a project</span></a>
       </div>
       <div class="ftr-col">
         <p class="eyebrow">Service area</p>
-        <ul class="ftr-offices">${areaOrder.map(c => `<li><span>${c} County</span></li>`).join('')}<li class="mono ftr-in"><span>Indiana</span><span data-clock="${TZ}">—:—</span></li></ul>
+        <ul class="ftr-offices">${stateOrder.map(c => `<li><span>${c}</span></li>`).join('')}</ul>
       </div>
       <div class="ftr-col">
         <p class="eyebrow">Explore</p>
@@ -113,14 +113,14 @@ export function footer(root) {
   <div class="ftr-wm" data-wm aria-hidden="true"><span>F</span><span>l</span><span class="wm-i">ı<i></i></span><span>n</span><span>t</span></div>
   <div class="wrap ftr-base mono">
     <span>© 2026 Flint Marketing. Just use Flint.</span>
-    <span>Est. 2026 · West-central Indiana</span>
+    <span>Est. 2026 · Indiana &amp; surrounding states</span>
     <a href="#top" class="ul" data-top>Back to top ↑</a>
   </div>
 </footer>`;
 }
 
 export function page({ root, path, title, desc, body, vars = '', fonts = [], cls = '', scripts = [], bare = false }) {
-  const fam = ['Schibsted+Grotesk:wght@400..900', 'Instrument+Serif:ital@0;1', 'IBM+Plex+Mono:wght@400;500', ...fonts].map(f => 'family=' + f).join('&');
+  const fam = ['Schibsted+Grotesk:wght@400..900', 'IBM+Plex+Mono:wght@400;500', ...fonts].map(f => 'family=' + f).join('&');
   return `<!doctype html>
 <html lang="en" class="no-js${bare ? ' is-app' : ''}"${vars ? ` style="${vars}"` : ''}>
 <head>
