@@ -26,14 +26,25 @@ export function home() {
   </div>
 </section>
 
-<section class="lx wrap" aria-labelledby="lx-h">
-  <div class="sec-head"><h2 id="lx-h" class="h-l" data-split>Launched this year</h2><p class="mono sec-meta">(${String(cases.length).padStart(2, '0')} sites)</p><a class="link-arrow sec-link" href="work/">All work ${arrow}</a></div>
-  <ul class="lx-grid">
-    ${cases.map((c, i) => `<li class="lx-i" data-reveal><a href="work/${c.slug}/" data-cursor="View">
-      <span class="lx-m" style="--lx-bg:${c.theme.bg}">${img(root, c.slug + '-hero', c.client + ': ' + c.title, '', `sizes="(min-width:900px) 50vw, 100vw"${i < 2 ? ' loading="eager"' : ''}`)}</span>
-      <span class="lx-txt"><span class="mono lx-k">${String(i + 1).padStart(2, '0')} · ${c.sector}</span><span class="lx-c">${c.client}</span><span class="lx-d">${c.lede.split('. ')[0].replace(/\.$/, '')}.</span><span class="mono lx-tags">${c.disc.join(' · ')} ${arrow}</span></span>
-    </a></li>`).join('')}
-  </ul>
+<section class="mb" aria-labelledby="mb-h">
+  <div class="wrap mb-in">
+    <div class="mb-head">
+      <p class="eyebrow">How the membership works</p>
+      <h2 class="h-l" id="mb-h" data-split>A premium website, then one simple monthly fee.</h2>
+      <p class="mb-lede" data-fade>Flint works on monthly memberships, so you get a finished, professional site without a large invoice on day one, and a team that keeps it working after launch.</p>
+      <div class="mb-price" data-fade><span class="mono">Memberships</span><span class="mb-p">$100–$5,000<span class="mb-mo">/month</span></span><span class="mb-pn">Depending on what you need each month.</span></div>
+      <div class="mb-cta" data-fade><a class="btn" href="contact/" data-magnetic><span>Start a project</span></a><a class="link-arrow" href="services/">Services ${arrow}</a></div>
+    </div>
+    <ol class="mb-steps">
+      ${[
+      ['Tell us about your business', 'Answer a few questions on Start a project. We reply within one business day.'],
+      ['Get a premium website', 'We start from a website we have already designed and tailor it to you: your words, photos, colors and pages.'],
+      ['Pay one monthly fee', 'No big upfront bill. Hosting, updates and changes are included in your membership.'],
+      ['Grow from there', 'Add strategy, social, ads or campaigns to the same membership when the business is ready.']
+      ].map((x, i) => `<li class="mb-s" data-reveal><span class="mono mb-n">${String(i + 1).padStart(2, '0')}</span><div><h3>${x[0]}</h3><p>${x[1]}</p></div></li>`).join('')}
+    </ol>
+  </div>
+  <div class="wrap mb-inc"><span class="mono">Included every month</span><ul>${['Hosting', 'Updates', 'Changes and new pages', 'A monthly check-in', 'One named lead'].map(x => `<li>${x}</li>`).join('')}</ul></div>
 </section>
 
 <section class="statement wrap grid">
