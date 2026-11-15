@@ -12,10 +12,18 @@ MAP={'aerial-hunter-hero':'ah-hero.jpg','aerial-hunter-deer':'ah-deer.jpg','aeri
  'bertrams-marine':'bt-marine.png','bertrams-ceramic':'bt-ceramic.png','bertrams-mega':'bt-mega.png','bertrams-reviews':'bt-reviews.png','bertrams-services-m':'bt-phone-services.png','bertrams-quote-m':'bt-phone-quote.png',
  'hero-pill':'hero-pill.webp'}
 man={}
+# Owner portraits: square, only when the prepared sources exist (see /workspace/flint-shots/round6/make_portraits.py)
+for n,src in {'owner-brian':'owner-brian.png','owner-ethan':'owner-ethan.png'}.items():
+    if os.path.exists(S+src): MAP[n]=src
 for n,src in MAP.items():
     p=S+src
     im=Image.open(p).convert('RGB'); W,H=im.size
     land=W>H
+    if n.startswith('owner-'):
+        ws=[w for w in [480,768,1024,1400] if w<=W]
+        for w in ws: im.resize((w,w),Image.LANCZOS).save(f'{O}{n}-{w}.webp','WEBP',quality=84,method=6)
+        d=min(768,W); im.resize((d,d),Image.LANCZOS).save(f'{O}{n}.webp','WEBP',quality=84,method=6)
+        man[n]={'w':d,'h':d,'ws':ws}; continue
     steps=[640,1024,1280,1600,2048] if land else [480,768,1152,1536]
     ws=[w for w in steps if w<=W]
     if W not in ws and W-ws[-1]>120: ws.append(W)

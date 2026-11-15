@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { esc, img, arrow, page, logo, stateList } from './shell.mjs';
 import { cases, services, news, states, stateOrder, region, regionLong } from './data.mjs';
 import { fmtDate, brandWall } from './pages-a.mjs';
@@ -82,6 +83,17 @@ export function servicePage(s, i) {
   return page({ root, path: 'services/', title: `${s.name} — Flint`, desc: s.lede, body, cls: 'p-service' });
 }
 
+// Owners: rendered only once both square portraits are in the image manifest (_build/img.json).
+const OWNERS = [['owner-brian', 'Brian Walls'], ['owner-ethan', 'Ethan']];
+const ownersSection = root => {
+  const man = JSON.parse(readFileSync(new URL('./img.json', import.meta.url), 'utf8'));
+  if (!OWNERS.every(([k]) => man[k])) return '';
+  return `<section class="wrap owners" aria-labelledby="ow-h">
+  <div class="sec-head"><h2 id="ow-h" class="h-l" data-split>Meet the owners</h2><p class="mono sec-meta">(02 owners)</p></div>
+  <ul class="ow-grid">${OWNERS.map(([k, name]) => `<li class="ow" data-reveal><figure class="ow-img">${img(root, k, `Portrait of ${name}, co-owner of Flint`, '', 'sizes="(min-width:900px) 30vw, (min-width:600px) 45vw, 100vw"')}</figure><div class="ow-t"><h3 class="ow-n">${name}</h3><p class="mono ow-r">Co-owner</p></div></li>`).join('')}</ul>
+</section>`;
+};
+
 export function about() {
   const root = '../';
   const body = `
@@ -99,6 +111,7 @@ export function about() {
   <div class="sec-head"><h2 id="pr-h" class="h-l" data-split>What we believe</h2></div>
   <ol class="pr">${[['Say one thing.', 'The brands people remember are the ones that edited hardest.'], ['Earn attention.', 'If people would skip it, we have not finished yet.'], ['Measure honestly.', 'We agree objectives up front and tell you plainly how we did.'], ['Stay close.', 'Small senior teams, a named lead and a reply within one business day.']].map((p, i) => `<li data-reveal><span class="mono">0${i + 1}</span><h3>${p[0]}</h3><p>${p[1]}</p></li>`).join('')}</ol>
 </section>
+${ownersSection(root)}
 <section class="wrap offices area" aria-labelledby="of-h">
   <div class="sec-head"><h2 id="of-h" class="h-l" data-split>Where we work</h2><p class="mono sec-meta">${stateOrder.join(' · ')}</p></div>
   <div class="area-grid">
